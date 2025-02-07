@@ -2,9 +2,10 @@ import { Component } from '@angular/core';
 import { DailyTask } from '../model/daily-task';
 
 @Component({
-  selector: 'app-daily-task',
-  templateUrl: './daily-task.component.html',
-  styleUrls: ['./daily-task.component.scss'],
+    selector: 'app-daily-task',
+    templateUrl: './daily-task.component.html',
+    styleUrls: ['./daily-task.component.scss'],
+    standalone: false
 })
 export class DailyTaskComponent {
   dailyTask: DailyTask;
