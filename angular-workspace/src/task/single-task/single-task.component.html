@@ -1,1 +1,16 @@
-<mat-checkbox>Check me!</mat-checkbox>
+<div class="flex justify-center">
+  <mat-checkbox
+    (change)="updateTaskState($event)"
+    [checked]="task?.taskCompleted"
+  ></mat-checkbox>
+  <mat-form-field>
+    <input type="text" matInput [value]="task?.taskDescription" />
+  </mat-form-field>
+  <button
+    (click)="deleteTask()"
+    mat-fab
+    aria-label="Example icon button with a delete icon"
+  >
+    <mat-icon>delete</mat-icon>
+  </button>
+</div>
