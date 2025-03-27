@@ -9,6 +9,7 @@ import { FormsModule } from '@angular/forms';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
 @Component({
   selector: 'app-single-task',
   imports: [
@@ -17,6 +18,7 @@ import { MatIconModule } from '@angular/material/icon';
     MatInputModule,
     MatFormFieldModule,
     MatIconModule,
+    MatButtonModule,
   ],
   templateUrl: './single-task.component.html',
   styleUrl: './single-task.component.scss',
@@ -34,4 +36,6 @@ export class SingleTaskComponent {
   deleteTask() {
     this._taskService.deleteTask(this.task);
   }
+
+  taskClicked() {}
 }

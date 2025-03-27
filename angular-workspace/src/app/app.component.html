@@ -1,8 +1,8 @@
-<div class="grid grid-cols-[200px_auto_400px] grid-rows-[50px_auto] h-screen">
-  <div class="col-span-3 bg-purple-300">Header</div>
-  <app-project-dashboard class="row-start-2 bg-red-400" />
-  <app-task-views class="row-start-2 bg-green-400" />
-  <app-task-detail class="row-start-2 bg-blue-400" />
+<div class="grid grid-cols-[200px_auto_400px] grid-rows-[auto_1fr] h-screen">
+  <app-main-toolbar class="col-span-3" />
+  <app-project-dashboard class="row-start-2" />
+  <app-task-views class="row-start-2" />
+  <app-task-detail class="row-start-2" />
 </div>
 
 <router-outlet />

@@ -1,6 +1,16 @@
 <div class="flex flex-col">
-  <div class="text-xl">Projects</div>
   <div *ngFor="let item of items; index as i">
-    {{ item.test }}
+    <div class="flex flex-row">
+      <button (click)="onProjectClicked(item)" mat-button>Project Title</button>
+      <button (click)="onProjectEditClicked(item)" mat-icon-button>
+        <mat-icon fontIcon="edit"></mat-icon>
+      </button>
+      <button (click)="onProjectDeleteClicked(item)" mat-icon-button>
+        <mat-icon fontIcon="delete"></mat-icon>
+      </button>
+    </div>
   </div>
+  <button class="grow self-center" mat-icon-button>
+    <mat-icon fontIcon="add"></mat-icon>
+  </button>
 </div>

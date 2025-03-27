@@ -1,16 +1,14 @@
-<div class="flex justify-center">
+<div class="flex justify-center grow">
   <mat-checkbox
     (change)="updateTaskState($event)"
     [checked]="task?.taskCompleted"
   ></mat-checkbox>
-  <mat-form-field>
-    <input type="text" matInput [value]="task?.taskDescription" />
-  </mat-form-field>
-  <button
-    (click)="deleteTask()"
-    mat-fab
-    aria-label="Example icon button with a delete icon"
-  >
-    <mat-icon>delete</mat-icon>
+  <button class="w-100" (click)="taskClicked()" mat-button>
+    {{ task?.taskDescription }}
   </button>
+  <div class="flex items-start">
+    <button (click)="deleteTask()" mat-icon-button>
+      <mat-icon fontIcon="delete"></mat-icon>
+    </button>
+  </div>
 </div>
