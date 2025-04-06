@@ -1,1 +1,14 @@
-<app-daily-task class="flex" />
+<div class="flex flex-col">
+  <div class="flex">
+    <div class="grow"></div>
+    <mat-form-field>
+      <mat-label>View</mat-label>
+      <mat-select (valueChange)="viewSelectionChanged($event)">
+        @for (view of availableViews; track view) {
+          <mat-option [value]="view">{{ view }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+  </div>
+  <app-daily-task />
+</div>
