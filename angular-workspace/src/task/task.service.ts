@@ -4,14 +4,32 @@ import { Task } from '../model/task.types';
 import { observableToBeFn } from 'rxjs/internal/testing/TestScheduler';
 import { HttpClient } from '@angular/common/http';
 import { error } from 'console';
+import { ProjectDashboardService } from '../app/project-dashboard/project-dashboard.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class TaskService {
   private baseTaskURL: string = 'https://localhost:44313/tasks';
-  constructor(private _httpClient: HttpClient) {
+  constructor(
+    private _httpClient: HttpClient,
+    private _projectDashboardService: ProjectDashboardService,
+  ) {
     this.loadDailyTask();
+  }
+
+  loadTaskByTaskGroupId(taskGroupId: number) {
+    const taskGroup = this._projectDashboardService.taskGroups.value?.find(
+      (x) => x.taskGroupId === taskGroupId,
+    );
+    this.dailyTask.next(taskGroup?.tasks);
+  }
+
+  loadTaskDetailByTaskId(taskId: number) {
+    const task = this.dailyTask.value?.find((x) => x.taskId === taskId);
+    if (task) {
+      this.taskDetail.next(task);
+    }
   }
 
   addTask() {

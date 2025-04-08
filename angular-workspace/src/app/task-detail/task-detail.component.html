@@ -1,22 +1,29 @@
 <ng-container *ngIf="taskDetail">
-  <div class="flex flex-col">
-    <div>Task Id: {{ taskDetail?.taskId }}</div>
-    <div class="flex items-center">
-      <p>Task Description:</p>
-      <mat-form-field>
-        <input
-          matInput
-          type="text"
-          [value]="taskDetail?.taskDescription"
-          (change)="updateTaskDescription($event)"
-        />
-      </mat-form-field>
+  <div class="flex">
+    <div class="flex flex-col">
+      <div>Task Id:</div>
+      <div class="flex items-center">
+        <p>Task Description:</p>
+      </div>
     </div>
-    <div class="flex">
-      <div class="grow"></div>
-      <button mat-icon-button (click)="onSaveDetail()">
-        <mat-icon fontIcon="save"></mat-icon>
-      </button>
+    <div class="flex flex-col">
+      <div>{{ taskDetail?.taskId }}</div>
+      <div class="flex items-center">
+        <mat-form-field>
+          <input
+            matInput
+            type="text"
+            [value]="taskDetail?.taskDescription"
+            (change)="updateTaskDescription($event)"
+          />
+        </mat-form-field>
+      </div>
+      <div class="flex">
+        <div class="grow"></div>
+        <button mat-icon-button (click)="onSaveDetail()">
+          <mat-icon fontIcon="save"></mat-icon>
+        </button>
+      </div>
     </div>
   </div>
 </ng-container>

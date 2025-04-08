@@ -1,15 +1,20 @@
-<div class="flex flex-col grow h-full">
-  <div class="overflow-y-auto m-3 p-2">
-    <div *ngFor="let task of _taskService.dailyTask$ | async">
-      <app-single-task [task]="task" />
+<div class="grid grid-cols-[auto_400px]">
+  <div class="flex flex-col grow h-full">
+    <div class="overflow-y-auto m-3 p-2">
+      <div *ngFor="let task of _taskService.dailyTask$ | async">
+        <app-single-task [task]="task" />
+      </div>
     </div>
+    <button
+      (click)="addTask()"
+      mat-button
+      aria-label="Example icon button with a delete icon"
+    >
+      <mat-icon>add</mat-icon>
+    </button>
+    <div>{{ _taskService.animation$ | async }}</div>
   </div>
-  <button
-    (click)="addTask()"
-    mat-button
-    aria-label="Example icon button with a delete icon"
-  >
-    <mat-icon>add</mat-icon>
-  </button>
-  <div>{{ _taskService.animation$ | async }}</div>
+  <div class="min-w-30">
+    <router-outlet />
+  </div>
 </div>

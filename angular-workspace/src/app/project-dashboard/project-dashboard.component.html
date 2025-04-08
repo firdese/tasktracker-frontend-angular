@@ -1,16 +1,60 @@
-<div class="flex flex-col">
-  <div *ngFor="let item of items; index as i">
-    <div class="flex flex-row">
-      <button (click)="onProjectClicked(item)" mat-button>Project Title</button>
-      <button (click)="onProjectEditClicked(item)" mat-icon-button>
-        <mat-icon fontIcon="edit"></mat-icon>
-      </button>
-      <button (click)="onProjectDeleteClicked(item)" mat-icon-button>
-        <mat-icon fontIcon="delete"></mat-icon>
+<mat-sidenav-container class="h-screen">
+  <!-- Sidebar -->
+  <mat-sidenav #sidenav mode="side" [(opened)]="sidebarOpened" class="w-64 p-4">
+    <div class="flex justify-between items-center mb-4">
+      <h2 class="text-xl font-bold">Projects</h2>
+      <button mat-icon-button (click)="sidebarOpened = false">
+        <mat-icon>close</mat-icon>
       </button>
     </div>
-  </div>
-  <button class="grow self-center" mat-icon-button>
-    <mat-icon fontIcon="add"></mat-icon>
-  </button>
-</div>
+
+    <mat-nav-list>
+      <mat-list-item *ngFor="let taskGroup of taskGroups">
+        <a [routerLink]="[taskGroup.taskGroupId]">
+          <div
+            class="flex flex-row items-center"
+            (mouseenter)="hoveredTask = taskGroup"
+            (mouseleave)="hoveredTask = null"
+          >
+            <span class="truncate">{{ taskGroup.taskGroupDescription }}</span>
+
+            <ng-container *ngIf="hoveredTask === taskGroup">
+              <button
+                (click)="onProjectDeleteClicked(taskGroup)"
+                mat-icon-button
+              >
+                <mat-icon fontIcon="delete"></mat-icon></button
+            ></ng-container>
+          </div>
+          <!-- <span class="truncate">{{ task.taskGroupDescription }}</span> -->
+        </a>
+      </mat-list-item>
+    </mat-nav-list>
+    <div class="flex flex-col w-full items-center">
+      <button (click)="addProject()" mat-icon-button>
+        <mat-icon fontIcon="add"></mat-icon>
+      </button>
+    </div>
+  </mat-sidenav>
+
+  <!-- Main content -->
+  <mat-sidenav-content class="relative">
+    <!-- Toggle Button -->
+    <button
+      mat-icon-button
+      (click)="sidebarOpened = true"
+      class="absolute top-4 left-4 z-10"
+    >
+      <mat-icon>menu</mat-icon>
+    </button>
+
+    <!-- Main Chat Area -->
+    <div class="flex p-8 flex-col">
+      <div class="flex flex-col items-center w-full">
+        <h1 class="text-2xl font-semibold">Welcome to Task Tracker</h1>
+        <p>Select a project from the sidebar.</p>
+      </div>
+      <router-outlet></router-outlet>
+    </div>
+  </mat-sidenav-content>
+</mat-sidenav-container>

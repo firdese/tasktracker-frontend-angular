@@ -3,9 +3,11 @@
     (change)="updateTaskState($event)"
     [checked]="task?.taskCompleted"
   ></mat-checkbox>
-  <button class="w-100" (click)="taskClicked()" mat-button>
-    {{ task?.taskDescription }}
-  </button>
+  <a [routerLink]="[task?.taskId]" class="w-100">
+    <div class="flex items-center">
+      <p>{{ task?.taskDescription }}</p>
+    </div>
+  </a>
   <div class="flex items-start">
     <button (click)="deleteTask()" mat-icon-button>
       <mat-icon fontIcon="delete"></mat-icon>
