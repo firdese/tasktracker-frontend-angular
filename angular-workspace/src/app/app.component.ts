@@ -14,6 +14,7 @@ import { MainToolbarComponent } from './main-toolbar/main-toolbar.component';
     TaskViewsComponent,
     TaskDetailComponent,
     MainToolbarComponent,
+    RouterOutlet,
   ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',
