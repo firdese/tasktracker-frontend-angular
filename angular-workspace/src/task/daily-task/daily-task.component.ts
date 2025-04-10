@@ -13,6 +13,7 @@ import { ActivatedRoute, RouterOutlet } from '@angular/router';
   styleUrl: './daily-task.component.scss',
 })
 export class DailyTaskComponent implements OnInit {
+  dailyTasks: Task[] | undefined = undefined;
   constructor(
     public _taskService: TaskService,
     private route: ActivatedRoute,
@@ -24,6 +25,10 @@ export class DailyTaskComponent implements OnInit {
       if (taskGroupId) {
         this._taskService.loadTaskByTaskGroupId(parseInt(taskGroupId));
       }
+    });
+
+    this._taskService.dailyTask$.subscribe((dailyTasks) => {
+      this.dailyTasks = dailyTasks;
     });
   }
 

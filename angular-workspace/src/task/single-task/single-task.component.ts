@@ -11,6 +11,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { RouterLink } from '@angular/router';
+import { MatListModule } from '@angular/material/list';
 @Component({
   selector: 'app-single-task',
   imports: [
@@ -20,6 +21,7 @@ import { RouterLink } from '@angular/router';
     MatFormFieldModule,
     MatIconModule,
     MatButtonModule,
+    MatListModule,
     RouterLink,
   ],
   templateUrl: './single-task.component.html',

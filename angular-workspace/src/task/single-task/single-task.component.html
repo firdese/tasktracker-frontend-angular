@@ -1,13 +1,18 @@
-<div class="flex justify-center grow">
+<div class="flex items-center justify-center">
   <mat-checkbox
     (change)="updateTaskState($event)"
     [checked]="task?.taskCompleted"
   ></mat-checkbox>
-  <a [routerLink]="[task?.taskId]" class="w-100">
-    <div class="flex items-center">
-      <p>{{ task?.taskDescription }}</p>
-    </div>
-  </a>
+  <div class="flex items-center w-full">
+    <mat-nav-list class="flex items-center w-full">
+      <mat-list-item class="flex items-center w-full">
+        <a class="flex items-center w-full" [routerLink]="[task?.taskId]">
+          {{ task?.taskDescription }}
+        </a>
+      </mat-list-item>
+    </mat-nav-list>
+  </div>
+
   <div class="flex items-start">
     <button (click)="deleteTask()" mat-icon-button>
       <mat-icon fontIcon="delete"></mat-icon>
