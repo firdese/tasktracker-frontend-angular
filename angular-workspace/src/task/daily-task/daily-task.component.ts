@@ -14,6 +14,7 @@ import { ActivatedRoute, RouterOutlet } from '@angular/router';
 })
 export class DailyTaskComponent implements OnInit {
   dailyTasks: Task[] | undefined = undefined;
+  groupTaskId: number = 0;
   constructor(
     public _taskService: TaskService,
     private route: ActivatedRoute,
@@ -23,7 +24,8 @@ export class DailyTaskComponent implements OnInit {
     this.route.paramMap.subscribe((params) => {
       const taskGroupId = params.get('groupTaskId');
       if (taskGroupId) {
-        this._taskService.loadTaskByTaskGroupId(parseInt(taskGroupId));
+        this.groupTaskId = parseInt(taskGroupId);
+        this._taskService.loadTaskByTaskGroupId(this.groupTaskId);
       }
     });
 
@@ -37,6 +39,6 @@ export class DailyTaskComponent implements OnInit {
   }
 
   addTask() {
-    this._taskService.addTask();
+    this._taskService.addTask(this.groupTaskId);
   }
 }

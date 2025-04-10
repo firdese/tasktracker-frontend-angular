@@ -5,6 +5,7 @@ import { observableToBeFn } from 'rxjs/internal/testing/TestScheduler';
 import { HttpClient } from '@angular/common/http';
 import { error } from 'console';
 import { ProjectDashboardService } from '../app/project-dashboard/project-dashboard.service';
+import { ToastrService } from 'ngx-toastr';
 
 @Injectable({
   providedIn: 'root',
@@ -14,6 +15,7 @@ export class TaskService {
   constructor(
     private _httpClient: HttpClient,
     private _projectDashboardService: ProjectDashboardService,
+    private _toastrService: ToastrService,
   ) {
     this.loadDailyTask();
   }
@@ -32,8 +34,12 @@ export class TaskService {
     }
   }
 
-  addTask() {
-    const newTask: Task = { taskCompleted: false, taskDescription: 'New task' };
+  addTask(groupTaskId: number) {
+    const newTask: Task = {
+      taskCompleted: false,
+      taskGroupId: groupTaskId,
+      taskDescription: 'New task',
+    };
     this._httpClient
       .post<Task[]>(this.baseTaskURL, [newTask])
       .subscribe((tasksCreated) =>
@@ -103,9 +109,8 @@ export class TaskService {
         });
 
         if (task?.taskCompleted) {
-          this.animation.next('smile');
+          this._toastrService.success('Noice! 😉');
         } else {
-          this.animation.next('frown');
         }
       });
 
