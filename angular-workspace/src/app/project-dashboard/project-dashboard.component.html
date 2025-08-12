@@ -16,7 +16,9 @@
             (mouseenter)="hoveredTask = taskGroup"
             (mouseleave)="hoveredTask = null"
           >
-            <span class="truncate">{{ taskGroup.taskGroupDescription }}</span>
+            <span class="truncate flex-1">{{
+              taskGroup.taskGroupDescription
+            }}</span>
 
             <ng-container *ngIf="hoveredTask === taskGroup">
               <button
@@ -49,8 +51,8 @@
     </button>
 
     <!-- Main Chat Area -->
-    <div class="flex p-8 flex-col">
-      <div class="flex flex-col items-center w-full">
+    <div class="p-8">
+      <div class="flex flex-col items-center">
         <h1 class="text-2xl font-semibold">Welcome to Task Tracker</h1>
         <p>Select a project from the sidebar.</p>
       </div>
