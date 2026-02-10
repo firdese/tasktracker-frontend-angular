@@ -1,22 +1,18 @@
-<div class="grid grid-cols-[auto_400px]">
-  <div class="flex flex-col grow h-full">
-    <div>
-      <button
-        (click)="addTask()"
-        mat-icon-button
-        aria-label="Example icon button with a delete icon"
-      >
+<div class="grid grid-cols-[auto_400px] h-full">
+  <div class="flex flex-col h-full min-h-0">
+    <div class="flex">
+      <button (click)="addTask()" mat-icon-button aria-label="Example icon button with a delete icon">
         <mat-icon>add</mat-icon>
       </button>
     </div>
-    <div class="overflow-y-auto m-3 p-2">
+    <div class="flex-1 overflow-y-auto">
       <div *ngFor="let task of dailyTasks">
         <app-single-task [task]="task" />
       </div>
     </div>
     <div>{{ _taskService.animation$ | async }}</div>
   </div>
-  <div>
+  <div class="h-full overflow-hidden">
     <router-outlet />
   </div>
 </div>

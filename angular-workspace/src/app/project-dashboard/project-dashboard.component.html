@@ -1,5 +1,4 @@
-<mat-sidenav-container class="h-screen">
-  <!-- Sidebar -->
+<mat-sidenav-container class="h-[calc(100vh-64px)] overflow-hidden">
   <mat-sidenav #sidenav mode="side" [(opened)]="sidebarOpened" class="w-64 p-4">
     <div class="flex justify-between items-center mb-4">
       <h2 class="text-xl font-bold">Projects</h2>
@@ -8,55 +7,48 @@
       </button>
     </div>
 
-    <mat-nav-list>
-      <mat-list-item *ngFor="let taskGroup of taskGroups">
-        <a [routerLink]="[taskGroup.taskGroupId]">
-          <div
-            class="flex flex-row items-center"
-            (mouseenter)="hoveredTask = taskGroup"
-            (mouseleave)="hoveredTask = null"
-          >
-            <span class="truncate flex-1">{{
-              taskGroup.taskGroupDescription
-            }}</span>
-
-            <ng-container *ngIf="hoveredTask === taskGroup">
-              <button
-                (click)="onProjectDeleteClicked(taskGroup)"
-                mat-icon-button
-              >
-                <mat-icon fontIcon="delete"></mat-icon></button
-            ></ng-container>
-          </div>
-          <!-- <span class="truncate">{{ task.taskGroupDescription }}</span> -->
-        </a>
-      </mat-list-item>
-    </mat-nav-list>
     <div class="flex flex-col w-full items-center">
       <button (click)="addProject()" mat-icon-button>
         <mat-icon fontIcon="add"></mat-icon>
       </button>
     </div>
+
+    <div class="h-full overflow-y-auto">
+      <mat-nav-list>
+        <a mat-list-item *ngFor="let taskGroup of taskGroups" [routerLink]="[taskGroup.taskGroupId]"
+          (mouseenter)="hoveredTask = taskGroup" (mouseleave)="hoveredTask = null">
+
+          <span class="truncate flex-1">
+            {{ taskGroup.taskGroupDescription }}
+          </span>
+
+          <ng-container *ngIf="hoveredTask === taskGroup">
+            <button (click)="onProjectDeleteClicked(taskGroup); $event.stopPropagation(); $event.preventDefault();"
+              mat-icon-button>
+              <mat-icon fontIcon="delete"></mat-icon>
+            </button>
+          </ng-container>
+        </a>
+      </mat-nav-list>
+    </div>
   </mat-sidenav>
 
-  <!-- Main content -->
   <mat-sidenav-content class="relative">
-    <!-- Toggle Button -->
-    <button
-      mat-icon-button
-      (click)="sidebarOpened = true"
-      class="absolute top-4 left-4 z-10"
-    >
-      <mat-icon>menu</mat-icon>
-    </button>
+    <div class="h-full flex flex-col">
+      <button (click)="sidebarOpened = true" class="absolute top-4 left-4 z-10 !p-0 !m-0 !w-fit !h-fit">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-600" fill="none" viewBox="0 0 24 24"
+          stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+      </button>
 
-    <!-- Main Chat Area -->
-    <div class="p-8">
       <div class="flex flex-col items-center">
         <h1 class="text-2xl font-semibold">Welcome to Task Tracker</h1>
         <p>Select a project from the sidebar.</p>
       </div>
-      <router-outlet></router-outlet>
+      <div class="flex-1 min-h-0">
+        <router-outlet></router-outlet>
+      </div>
     </div>
   </mat-sidenav-content>
 </mat-sidenav-container>

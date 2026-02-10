@@ -1,16 +1,14 @@
 <ng-container *ngIf="taskDetail">
   <div class="grid grid-cols-2 gap-3 row items-center">
     <div>Task ID</div>
-    <div>{{ taskDetail?.taskId }}</div>
+    <div class="flex items-center"><mat-form-field>
+        <input matInput type="number" [value]="taskDetail?.taskId" [readonly]="true"
+          (change)="updateTaskDescription($event)" />
+      </mat-form-field></div>
     <div>Task Description</div>
     <div class="flex items-center">
       <mat-form-field>
-        <input
-          matInput
-          type="text"
-          [value]="taskDetail?.taskDescription"
-          (change)="updateTaskDescription($event)"
-        />
+        <input matInput type="text" [value]="taskDetail?.taskDescription" (change)="updateTaskDescription($event)" />
       </mat-form-field>
     </div>
   </div>

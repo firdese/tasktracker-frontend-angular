@@ -7,7 +7,7 @@ import { HttpClient } from '@angular/common/http';
   providedIn: 'root',
 })
 export class ProjectDashboardService {
-  private baseTaskGroupUrl: string = 'https://localhost:44313/taskgroup';
+  private baseTaskGroupUrl: string = 'http://localhost:5000/taskgroup';
   constructor(private _httpClient: HttpClient) {
     this.loadTaskGroups();
   }

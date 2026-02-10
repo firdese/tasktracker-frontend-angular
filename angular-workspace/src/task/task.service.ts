@@ -11,7 +11,7 @@ import { ToastrService } from 'ngx-toastr';
   providedIn: 'root',
 })
 export class TaskService {
-  private baseTaskURL: string = 'https://localhost:44313/tasks';
+  private baseTaskURL: string = 'http://localhost:5000/tasks';
   constructor(
     private _httpClient: HttpClient,
     private _projectDashboardService: ProjectDashboardService,
@@ -50,17 +50,20 @@ export class TaskService {
   }
 
   deleteTask(task: Task | undefined) {
+    if (!task) {
+      return;
+    }
     this._httpClient
-      .delete<Task[]>(this.baseTaskURL, { body: [task] })
-      .subscribe((taskDeleted) => {
-        taskDeleted.forEach((taskDeleted) => {
-          const deletedIndex = this.dailyTask.value?.findIndex(
-            (x) => x.taskId === taskDeleted.taskId,
+      .delete<any>(this.baseTaskURL, { body: [task] })
+      .subscribe((response) => {
+        const deletedIndex = this.dailyTask.value?.findIndex(
+          (x) => x.taskId === task.taskId,
+        );
+        if (deletedIndex) {
+          this.dailyTask.next(
+            this.dailyTask.value?.filter((_, i) => i !== deletedIndex),
           );
-          if (deletedIndex) {
-            this.dailyTask.value?.splice(deletedIndex, 1);
-          }
-        });
+        }
       });
   }
 

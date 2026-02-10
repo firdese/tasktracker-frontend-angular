@@ -3,6 +3,7 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import { SoftwareMetadataService } from '../software-metadata.service';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
+import { keycloak } from '../keycloak-init';
 
 @Component({
   selector: 'app-main-toolbar',
@@ -12,6 +13,7 @@ import { MatButtonModule } from '@angular/material/button';
 })
 export class MainToolbarComponent implements OnInit {
   softwareVersion: string = '';
+
   constructor(private _softwareMetadataService: SoftwareMetadataService) {}
   ngOnInit(): void {
     this._softwareMetadataService.softwareVersion$.subscribe(
@@ -21,5 +23,7 @@ export class MainToolbarComponent implements OnInit {
     );
   }
 
-  onUserAccountClicked() {}
+  onUserAccountClicked() {
+    keycloak.logout();
+  }
 }
