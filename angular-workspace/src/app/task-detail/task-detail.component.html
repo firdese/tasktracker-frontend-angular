@@ -99,9 +99,10 @@
 
     <section class="detail-section">
       <h4 class="detail-section-title">Dates</h4>
+      <p class="detail-timezone-note">Displayed in local time: {{ localTimeZone }}. Saved as UTC.</p>
       <div class="detail-grid">
         <div class="field-block">
-          <label class="field-caption">Start (UTC)</label>
+          <label class="field-caption">Start (Local)</label>
           <mat-form-field appearance="outline" class="detail-field">
             <input
               matInput
@@ -119,7 +120,7 @@
         </div>
 
         <div class="field-block">
-          <label class="field-caption">End (UTC)</label>
+          <label class="field-caption">End (Local)</label>
           <mat-form-field appearance="outline" class="detail-field">
             <input
               matInput
@@ -137,7 +138,7 @@
         </div>
 
         <div class="field-block">
-          <label class="field-caption">Due (UTC)</label>
+          <label class="field-caption">Due (Local)</label>
           <mat-form-field appearance="outline" class="detail-field">
             <input
               matInput
@@ -155,7 +156,7 @@
         </div>
 
         <div class="field-block">
-          <label class="field-caption">Completed (UTC)</label>
+          <label class="field-caption">Completed (Local)</label>
           <mat-form-field appearance="outline" class="detail-field">
             <input
               matInput
@@ -173,7 +174,7 @@
         </div>
 
         <div class="field-block">
-          <label class="field-caption">Deleted (UTC)</label>
+          <label class="field-caption">Deleted (Local)</label>
           <mat-form-field appearance="outline" class="detail-field">
             <input
               matInput
@@ -194,12 +195,12 @@
     <section class="detail-meta detail-section">
       <h4 class="detail-section-title">System Metadata</h4>
       <div class="detail-meta-row">
-        <span class="detail-meta-label">Created (UTC)</span>
-        <span class="detail-meta-value">{{ taskDetail.taskCreatedAtUtc ? (taskDetail.taskCreatedAtUtc | date: 'medium' : 'UTC') : 'N/A' }}</span>
+        <span class="detail-meta-label">Created (Local)</span>
+        <span class="detail-meta-value">{{ taskDetail.taskCreatedAtUtc ? (taskDetail.taskCreatedAtUtc | date: metadataDateFormat) : 'N/A' }}</span>
       </div>
       <div class="detail-meta-row">
-        <span class="detail-meta-label">Updated (UTC)</span>
-        <span class="detail-meta-value">{{ taskDetail.taskUpdatedAtUtc ? (taskDetail.taskUpdatedAtUtc | date: 'medium' : 'UTC') : 'N/A' }}</span>
+        <span class="detail-meta-label">Updated (Local)</span>
+        <span class="detail-meta-value">{{ taskDetail.taskUpdatedAtUtc ? (taskDetail.taskUpdatedAtUtc | date: metadataDateFormat) : 'N/A' }}</span>
       </div>
     </section>
 

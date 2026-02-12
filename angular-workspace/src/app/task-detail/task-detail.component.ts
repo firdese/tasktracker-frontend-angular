@@ -41,6 +41,9 @@ type EditableTaskDateKey = NullableTaskDateKey;
 export class TaskDetailComponent implements OnInit {
   taskDetail: Task | undefined;
   dependencyTaskIdsInput: string = '';
+  readonly localTimeZone: string =
+    Intl.DateTimeFormat().resolvedOptions().timeZone || 'Local time';
+  readonly metadataDateFormat: string = 'MMM d, y, h:mm:ss a z';
   readonly priorityOptions: Array<{ value: number; label: string }> = [
     { value: 1, label: 'P1 - Critical' },
     { value: 2, label: 'P2 - High' },
