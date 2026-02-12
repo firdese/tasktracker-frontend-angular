@@ -40,6 +40,7 @@ interface GanttRow {
 }
 
 type FocusMode = 'all' | 'overdue' | 'today' | 'week';
+type SortMode = 'display' | 'due' | 'priority' | 'updated';
 
 @Component({
   selector: 'app-daily-task',
@@ -68,6 +69,9 @@ export class DailyTaskComponent implements OnInit {
   ganttRows: GanttRow[] = [];
   ganttUnscheduledTasks: Task[] = [];
   selectedFocusMode: FocusMode = 'all';
+  selectedSortMode: SortMode = 'display';
+  hideCompletedTasks: boolean = false;
+  searchTerm: string = '';
   readonly DashboardView = DashboardView;
   selectedView: DashboardView = DashboardView.List;
   private readonly _viewQueryMap: Record<string, DashboardView> = {
@@ -81,6 +85,12 @@ export class DailyTaskComponent implements OnInit {
     overdue: 'overdue',
     today: 'today',
     week: 'week',
+  };
+  private readonly _sortQueryMap: Record<string, SortMode> = {
+    display: 'display',
+    due: 'due',
+    priority: 'priority',
+    updated: 'updated',
   };
   constructor(
     public _taskService: TaskService,
@@ -105,14 +115,22 @@ export class DailyTaskComponent implements OnInit {
     this.route.queryParamMap.subscribe((queryParams) => {
       const viewParam = queryParams.get('view')?.toLowerCase();
       const focusParam = queryParams.get('focus')?.toLowerCase();
+      const sortParam = queryParams.get('sort')?.toLowerCase();
+      const hideCompletedParam = queryParams.get('hideCompleted')?.toLowerCase();
+      const searchParam = queryParams.get('q') ?? '';
 
       const parsedView = viewParam ? this._viewQueryMap[viewParam] : undefined;
       const parsedFocus = focusParam
         ? this._focusQueryMap[focusParam]
         : undefined;
+      const parsedSort = sortParam ? this._sortQueryMap[sortParam] : undefined;
 
       this.selectedView = parsedView ?? DashboardView.List;
       this.selectedFocusMode = parsedFocus ?? 'all';
+      this.selectedSortMode = parsedSort ?? 'display';
+      this.hideCompletedTasks = hideCompletedParam === '1';
+      this.searchTerm = searchParam;
+      this.rebuildGanttChart();
     });
 
     this._taskService.dailyTask$.subscribe((dailyTasks) => {
@@ -147,8 +165,9 @@ export class DailyTaskComponent implements OnInit {
   }
 
   get sortedDailyTasks(): Task[] {
-    return this.getFocusedTasks().sort((leftTask, rightTask) =>
-      this.compareTasksForDisplay(leftTask, rightTask),
+    const tasks = this.getFilteredTasks();
+    return tasks.sort((leftTask, rightTask) =>
+      this.compareTasksBySortMode(leftTask, rightTask),
     );
   }
 
@@ -165,6 +184,25 @@ export class DailyTaskComponent implements OnInit {
   setFocusMode(mode: FocusMode) {
     this.selectedFocusMode = mode;
     this.syncRouteQuery();
+    this.rebuildGanttChart();
+  }
+
+  setSortMode(mode: SortMode) {
+    this.selectedSortMode = mode;
+    this.syncRouteQuery();
+    this.rebuildGanttChart();
+  }
+
+  setHideCompletedTasks(hideCompletedTasks: boolean) {
+    this.hideCompletedTasks = hideCompletedTasks;
+    this.syncRouteQuery();
+    this.rebuildGanttChart();
+  }
+
+  setSearchTerm(searchTerm: string) {
+    this.searchTerm = searchTerm;
+    this.syncRouteQuery();
+    this.rebuildGanttChart();
   }
 
   get timelineGroups(): TimelineGroup[] {
@@ -492,6 +530,43 @@ export class DailyTaskComponent implements OnInit {
     );
   }
 
+  private compareTasksBySortMode(leftTask: Task, rightTask: Task): number {
+    if (this.selectedSortMode === 'due') {
+      const dueComparison = this.compareNullableDates(
+        leftTask.taskDueAtUtc,
+        rightTask.taskDueAtUtc,
+      );
+      if (dueComparison !== 0) {
+        return dueComparison;
+      }
+      return this.compareTasksForDisplay(leftTask, rightTask);
+    }
+
+    if (this.selectedSortMode === 'priority') {
+      const priorityComparison = this.compareNullableNumbers(
+        leftTask.taskPriority,
+        rightTask.taskPriority,
+      );
+      if (priorityComparison !== 0) {
+        return priorityComparison;
+      }
+      return this.compareTasksForDisplay(leftTask, rightTask);
+    }
+
+    if (this.selectedSortMode === 'updated') {
+      const updatedComparison = this.compareNullableDates(
+        rightTask.taskUpdatedAtUtc,
+        leftTask.taskUpdatedAtUtc,
+      );
+      if (updatedComparison !== 0) {
+        return updatedComparison;
+      }
+      return this.compareTasksForDisplay(leftTask, rightTask);
+    }
+
+    return this.compareTasksForDisplay(leftTask, rightTask);
+  }
+
   private compareNullableNumbers(
     leftValue: number | null | undefined,
     rightValue: number | null | undefined,
@@ -511,6 +586,29 @@ export class DailyTaskComponent implements OnInit {
     return leftValue - rightValue;
   }
 
+  private compareNullableDates(
+    leftValue: string | null | undefined,
+    rightValue: string | null | undefined,
+  ): number {
+    const leftTimestamp = this.parseTaskDate(leftValue)?.getTime();
+    const rightTimestamp = this.parseTaskDate(rightValue)?.getTime();
+
+    const leftIsDefined = leftTimestamp !== undefined;
+    const rightIsDefined = rightTimestamp !== undefined;
+
+    if (!leftIsDefined && !rightIsDefined) {
+      return 0;
+    }
+    if (!leftIsDefined) {
+      return 1;
+    }
+    if (!rightIsDefined) {
+      return -1;
+    }
+
+    return leftTimestamp - rightTimestamp;
+  }
+
   private getFocusedTasks(): Task[] {
     const tasks = [...(this.dailyTasks ?? [])];
     if (this.selectedFocusMode === 'all') {
@@ -526,6 +624,30 @@ export class DailyTaskComponent implements OnInit {
     }
 
     return tasks.filter((task) => this.isTaskDueThisWeek(task));
+  }
+
+  private getFilteredTasks(): Task[] {
+    let tasks = this.getFocusedTasks();
+
+    if (this.hideCompletedTasks) {
+      tasks = tasks.filter((task) => !task.taskCompletedAtUtc);
+    }
+
+    const normalizedSearch = this.searchTerm.trim().toLowerCase();
+    if (!normalizedSearch) {
+      return tasks;
+    }
+
+    return tasks.filter((task) => {
+      const description = (task.taskDescription ?? '').toLowerCase();
+      const taskId = `${task.taskId ?? ''}`;
+      const priority = `${task.taskPriority ?? ''}`;
+      return (
+        description.includes(normalizedSearch) ||
+        taskId.includes(normalizedSearch) ||
+        priority.includes(normalizedSearch)
+      );
+    });
   }
 
   private isTaskOverdue(task: Task): boolean {
@@ -570,9 +692,16 @@ export class DailyTaskComponent implements OnInit {
 
     this._router.navigate(['/', this.groupTaskId], {
       queryParams: {
-        view: this.selectedView.toLowerCase(),
-        focus: this.selectedFocusMode,
+        view:
+          this.selectedView === DashboardView.List
+            ? null
+            : this.selectedView.toLowerCase(),
+        focus: this.selectedFocusMode === 'all' ? null : this.selectedFocusMode,
+        sort: this.selectedSortMode === 'display' ? null : this.selectedSortMode,
+        hideCompleted: this.hideCompletedTasks ? '1' : null,
+        q: this.searchTerm.trim() ? this.searchTerm.trim() : null,
       },
+      queryParamsHandling: 'merge',
     });
   }
 }

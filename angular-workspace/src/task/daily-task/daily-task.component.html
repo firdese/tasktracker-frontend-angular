@@ -117,6 +117,43 @@
       </button>
     </div>
 
+    <div class="task-ops-bar">
+      <label class="task-search">
+        <mat-icon fontIcon="search"></mat-icon>
+        <input
+          type="text"
+          [value]="searchTerm"
+          (input)="setSearchTerm($any($event.target).value)"
+          placeholder="Search by task name, id, or priority"
+          aria-label="Search tasks"
+        />
+      </label>
+
+      <label class="task-sort">
+        <span>Sort</span>
+        <select
+          [value]="selectedSortMode"
+          (change)="setSortMode($any($event.target).value)"
+          aria-label="Sort tasks"
+        >
+          <option value="display">Manual / Default</option>
+          <option value="due">Due Date</option>
+          <option value="priority">Priority</option>
+          <option value="updated">Recently Updated</option>
+        </select>
+      </label>
+
+      <label class="task-hide-completed">
+        <input
+          type="checkbox"
+          [checked]="hideCompletedTasks"
+          (change)="setHideCompletedTasks($any($event.target).checked)"
+          aria-label="Hide completed tasks"
+        />
+        <span>Hide completed</span>
+      </label>
+    </div>
+
     <div class="task-list-wrap">
       <ng-container *ngIf="selectedView === DashboardView.List; else nonDailyView">
         <div *ngIf="sortedDailyTasks.length; else emptyState" class="task-list">
@@ -234,9 +271,6 @@
       </ng-template>
     </div>
 
-    <div class="task-panel-foot">
-      Status: {{ _taskService.animation$ | async }}
-    </div>
   </section>
 
   <aside class="task-detail-panel" [class.full-width]="isTaskDetailActive" [class.is-hidden]="!isTaskDetailActive">
