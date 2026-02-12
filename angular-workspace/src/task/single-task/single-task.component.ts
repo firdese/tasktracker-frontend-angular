@@ -19,7 +19,13 @@ export class SingleTaskComponent {
   private _taskService = inject(TaskService);
 
   updateTaskState(event: MatCheckboxChange) {
-    this.task!.taskCompleted = event.checked;
+    if (!this.task) {
+      return;
+    }
+
+    this.task.taskCompletedAtUtc = event.checked
+      ? new Date().toISOString()
+      : null;
     this._taskService.updateTask(this.task, 'toggle');
   }
 

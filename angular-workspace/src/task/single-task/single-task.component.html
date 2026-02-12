@@ -1,8 +1,8 @@
-<article class="task-item" [class.is-complete]="task?.taskCompleted">
+<article class="task-item" [class.is-complete]="!!task?.taskCompletedAtUtc">
   <mat-checkbox
     class="task-checkbox"
     (change)="updateTaskState($event)"
-    [checked]="task?.taskCompleted"
+    [checked]="!!task?.taskCompletedAtUtc"
   ></mat-checkbox>
 
   <a class="task-main" [routerLink]="[task?.taskId]">
@@ -11,8 +11,8 @@
   </a>
 
   <div class="task-actions">
-    <span class="task-state" [class.done]="task?.taskCompleted">
-      {{ task?.taskCompleted ? "Done" : "In progress" }}
+    <span class="task-state" [class.done]="!!task?.taskCompletedAtUtc">
+      {{ task?.taskCompletedAtUtc ? "Done" : "In progress" }}
     </span>
 
     <button class="task-delete" (click)="deleteTask()" mat-icon-button aria-label="Delete task">

@@ -40,10 +40,13 @@ export class TaskService {
   }
 
   addTask(groupTaskId: number) {
+    const nowUtc = new Date().toISOString();
     const newTask: Task = {
-      taskCompleted: false,
       taskGroupId: groupTaskId,
       taskDescription: 'New task',
+      taskCreatedAtUtc: nowUtc,
+      taskUpdatedAtUtc: nowUtc,
+      taskCompletedAtUtc: null,
     };
     this._httpClient
       .post<Task[]>(this.baseTaskURL, [newTask])
@@ -119,9 +122,13 @@ export class TaskService {
     if (!task) {
       return;
     }
+    const taskToUpdate: Task = {
+      ...task,
+      taskUpdatedAtUtc: new Date().toISOString(),
+    };
 
     this._httpClient
-      .put<Task[]>(this.baseTaskURL, [task])
+      .put<Task[]>(this.baseTaskURL, [taskToUpdate])
       .subscribe({
         next: (tasksEdited) => {
           tasksEdited.forEach((taskEdited) => {
@@ -137,7 +144,7 @@ export class TaskService {
 
           if (source === 'toggle') {
             this._toastrService.success(
-              task.taskCompleted ? 'Task marked as done' : 'Task marked as not done',
+              taskToUpdate.taskCompletedAtUtc ? 'Task marked as done' : 'Task marked as not done',
             );
             return;
           }

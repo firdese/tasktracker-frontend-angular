@@ -1,6 +1,12 @@
 export interface Task {
   taskId?: number;
-  taskGroupId: number;
   taskDescription?: string;
-  taskCompleted?: boolean;
+  taskCreatedAtUtc?: string;
+  taskUpdatedAtUtc?: string;
+  taskCompletedAtUtc?: string | null;
+  taskDueAtUtc?: string | null;
+  taskDeletedAtUtc?: string | null;
+  taskSortOrder?: number;
+  taskPriority?: number;
+  taskGroupId: number;
 }
