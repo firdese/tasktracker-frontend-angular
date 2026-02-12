@@ -2,7 +2,52 @@
   <section class="task-panel">
     <div class="task-panel-head">
       <div>
-        <h2 class="task-panel-title">Daily Tasks</h2>
+        <div class="task-panel-title-row">
+          <h2 class="task-panel-title">Daily Tasks</h2>
+          <ng-container *ngIf="!editingProjectDescription; else editProjectDescriptionTemplate">
+            <button
+              mat-icon-button
+              class="project-edit-btn"
+              (click)="startProjectDescriptionEdit()"
+              aria-label="Edit project description"
+            >
+              <mat-icon fontIcon="edit"></mat-icon>
+            </button>
+          </ng-container>
+          <ng-template #editProjectDescriptionTemplate>
+            <button
+              mat-icon-button
+              class="project-save-btn"
+              (click)="saveProjectDescription($event)"
+              aria-label="Save project description"
+            >
+              <mat-icon fontIcon="check"></mat-icon>
+            </button>
+            <button
+              mat-icon-button
+              class="project-cancel-btn"
+              (click)="cancelProjectDescriptionEdit($event)"
+              aria-label="Cancel project description edit"
+            >
+              <mat-icon fontIcon="close"></mat-icon>
+            </button>
+          </ng-template>
+        </div>
+
+        <ng-container *ngIf="!editingProjectDescription; else projectDescriptionEditInput">
+          <p class="task-panel-project-name">{{ activeTaskGroup?.taskGroupDescription || 'Project' }}</p>
+        </ng-container>
+        <ng-template #projectDescriptionEditInput>
+          <input
+            class="project-description-input"
+            [value]="projectDescriptionDraft"
+            (input)="projectDescriptionDraft = $any($event.target).value"
+            (keydown.enter)="saveProjectDescription($event)"
+            (keydown.escape)="cancelProjectDescriptionEdit($event)"
+            aria-label="Project description"
+          />
+        </ng-template>
+
         <p class="task-panel-subtitle">
           {{ dailyTasks?.length ?? 0 }} task{{ (dailyTasks?.length ?? 0) === 1 ? '' : 's' }}
         </p>

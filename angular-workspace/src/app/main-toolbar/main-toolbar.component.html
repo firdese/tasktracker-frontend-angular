@@ -1,7 +1,28 @@
-<mat-toolbar class="flex shrink">
-  <h1>Task Tracker {{ softwareVersion }}</h1>
+<mat-toolbar class="app-toolbar">
+  <div class="brand-block">
+    <h1 class="brand-title">Task Tracker</h1>
+    <span class="version-pill">v{{ softwareVersion }}</span>
+  </div>
+
   <div class="grow"></div>
-  <button mat-icon-button (click)="onUserAccountClicked()">
-    <mat-icon aria-hidden="false" aria-label="Example home icon" fontIcon="account_circle"></mat-icon>
+
+  <button class="account-chip" mat-button [matMenuTriggerFor]="accountMenu" aria-label="Open account menu">
+    <span class="account-avatar">{{ userInitials }}</span>
+    <span class="account-meta">
+      <span class="account-name">{{ displayName }}</span>
+      <span class="account-email">{{ displayEmail || "Workspace User" }}</span>
+    </span>
+    <mat-icon class="account-chevron" fontIcon="expand_more"></mat-icon>
   </button>
 </mat-toolbar>
+
+<mat-menu #accountMenu="matMenu" xPosition="before">
+  <button mat-menu-item disabled>
+    <mat-icon fontIcon="badge"></mat-icon>
+    <span>{{ displayName }}</span>
+  </button>
+  <button mat-menu-item (click)="onUserAccountClicked()">
+    <mat-icon fontIcon="logout"></mat-icon>
+    <span>Sign out</span>
+  </button>
+</mat-menu>

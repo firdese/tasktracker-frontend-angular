@@ -11,11 +11,21 @@
   width: 100%;
 }
 
+:host ::ng-deep .project-list-item .mdc-list-item__content {
+  overflow: visible;
+}
+
+:host ::ng-deep .project-list-item.is-editing.mdc-list-item {
+  --mdc-list-list-item-one-line-container-height: 3.25rem;
+  overflow: visible;
+}
+
 .project-list {
   padding-top: 0.25rem;
 }
 
 .project-list-item {
+  --mdc-list-list-item-one-line-container-height: 3rem;
   display: flex;
   align-items: center;
   margin-bottom: 0.25rem;
@@ -47,12 +57,32 @@
   padding-right: 0.25rem;
 }
 
+.project-edit-input {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 2.25rem;
+  border: 1px solid rgba(148, 163, 184, 0.45);
+  border-radius: 0.45rem;
+  background: rgba(15, 23, 42, 0.85);
+  color: #e2e8f0;
+  padding: 0.35rem 0.6rem;
+  font: inherit;
+  line-height: 1.25;
+}
+
+.project-edit-input:focus {
+  outline: none;
+  border-color: rgba(56, 189, 248, 0.85);
+  box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.2);
+}
+
+.edit-btn,
 .delete-btn {
   flex-shrink: 0;
   width: 2rem;
   height: 2rem;
   border-radius: 999px;
-  color: #ef4444;
   opacity: 0;
   transform: scale(0.92);
   pointer-events: none;
@@ -62,11 +92,52 @@
     background-color 120ms ease;
 }
 
+.edit-btn {
+  color: #a5f3fc;
+}
+
+.save-btn,
+.cancel-btn {
+  flex-shrink: 0;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 999px;
+}
+
+.save-btn {
+  color: #86efac;
+}
+
+.cancel-btn {
+  color: #fca5a5;
+}
+
+.delete-btn {
+  color: #ef4444;
+}
+
+.project-list-item:hover .edit-btn,
 .project-list-item:hover .delete-btn,
 .project-list-item:focus-within .delete-btn {
   opacity: 1;
   transform: scale(1);
   pointer-events: auto;
+}
+
+.project-list-item:focus-within .edit-btn {
+  opacity: 1;
+  transform: scale(1);
+  pointer-events: auto;
+}
+
+.project-list-item.is-editing .delete-btn,
+.project-list-item.is-editing .edit-btn {
+  display: none;
+}
+
+.project-list-item.is-editing .project-title {
+  overflow: visible;
+  white-space: normal;
 }
 
 .delete-btn:hover {

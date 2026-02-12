@@ -4,6 +4,8 @@ import { Task } from '../model/task.types';
 import { HttpClient } from '@angular/common/http';
 import { ToastrService } from 'ngx-toastr';
 
+type UpdateTaskSource = 'toggle' | 'detail' | 'generic';
+
 @Injectable({
   providedIn: 'root',
 })
@@ -46,8 +48,14 @@ export class TaskService {
     this._httpClient
       .post<Task[]>(this.baseTaskURL, [newTask])
       .subscribe({
-        next: () => this.loadTaskByTaskGroupId(groupTaskId),
-        error: (error) => console.log(error),
+        next: () => {
+          this.loadTaskByTaskGroupId(groupTaskId);
+          this._toastrService.success('Task created');
+        },
+        error: (error) => {
+          console.log(error);
+          this._toastrService.error('Could not create task');
+        },
       });
   }
 
@@ -57,15 +65,22 @@ export class TaskService {
     }
     this._httpClient
       .delete<any>(this.baseTaskURL, { body: [task] })
-      .subscribe(() => {
-        const deletedIndex = this._dailyTask.value?.findIndex(
-          (x) => x.taskId === task.taskId,
-        );
-        if (deletedIndex !== undefined && deletedIndex >= 0) {
-          this._dailyTask.next(
-            this._dailyTask.value?.filter((_, i) => i !== deletedIndex),
+      .subscribe({
+        next: () => {
+          const deletedIndex = this._dailyTask.value?.findIndex(
+            (x) => x.taskId === task.taskId,
           );
-        }
+          if (deletedIndex !== undefined && deletedIndex >= 0) {
+            this._dailyTask.next(
+              this._dailyTask.value?.filter((_, i) => i !== deletedIndex),
+            );
+          }
+          this._toastrService.success('Task deleted');
+        },
+        error: (error) => {
+          console.log(error);
+          this._toastrService.error('Could not delete task');
+        },
       });
   }
 
@@ -100,25 +115,44 @@ export class TaskService {
     );
   }
 
-  updateTask(task: Task | undefined) {
+  updateTask(task: Task | undefined, source: UpdateTaskSource = 'generic') {
+    if (!task) {
+      return;
+    }
+
     this._httpClient
       .put<Task[]>(this.baseTaskURL, [task])
-      .subscribe((tasksEdited) => {
-        tasksEdited.forEach((taskEdited) => {
-          const indexOfEditedTask = this._dailyTask.value?.findIndex(
-            (x) => x.taskId === taskEdited.taskId,
-          );
-          if (indexOfEditedTask !== undefined && indexOfEditedTask >= 0) {
-            const currentTasks = [...(this._dailyTask.value ?? [])];
-            currentTasks.splice(indexOfEditedTask, 1, taskEdited);
-            this._dailyTask.next(currentTasks);
-          }
-        });
+      .subscribe({
+        next: (tasksEdited) => {
+          tasksEdited.forEach((taskEdited) => {
+            const indexOfEditedTask = this._dailyTask.value?.findIndex(
+              (x) => x.taskId === taskEdited.taskId,
+            );
+            if (indexOfEditedTask !== undefined && indexOfEditedTask >= 0) {
+              const currentTasks = [...(this._dailyTask.value ?? [])];
+              currentTasks.splice(indexOfEditedTask, 1, taskEdited);
+              this._dailyTask.next(currentTasks);
+            }
+          });
 
-        if (task?.taskCompleted) {
-          this._toastrService.success('Noice! 😉');
-        } else {
-        }
+          if (source === 'toggle') {
+            this._toastrService.success(
+              task.taskCompleted ? 'Task marked as done' : 'Task marked as not done',
+            );
+            return;
+          }
+
+          if (source === 'detail') {
+            this._toastrService.success('Task saved');
+            return;
+          }
+
+          this._toastrService.success('Task updated');
+        },
+        error: (error) => {
+          console.log(error);
+          this._toastrService.error('Could not update task');
+        },
       });
 
     // const removeExising: Task[] | undefined = this.dailyTask.value?.filter(

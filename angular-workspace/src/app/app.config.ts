@@ -7,7 +7,6 @@ import {
   withEventReplay,
 } from '@angular/platform-browser';
 import { provideAnimations } from '@angular/platform-browser/animations';
-import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { provideToastr } from 'ngx-toastr';
 import { authInterceptor } from '../interceptor/auth-interceptor';
@@ -18,11 +17,13 @@ export const appConfig: ApplicationConfig = {
     provideRouter(routes),
     provideClientHydration(withEventReplay()),
     provideAnimations(),
-    provideAnimationsAsync(),
-    provideHttpClient(),
-    provideToastr({ positionClass: 'toast-bottom-right' }), // <--- this is what you need
-    provideHttpClient(
-      withInterceptors([authInterceptor])
-      )
+    provideHttpClient(withInterceptors([authInterceptor])),
+    provideToastr({
+      positionClass: 'toast-bottom-right',
+      timeOut: 2000,
+      extendedTimeOut: 500,
+      preventDuplicates: true,
+      progressBar: true,
+    }),
   ],
 };

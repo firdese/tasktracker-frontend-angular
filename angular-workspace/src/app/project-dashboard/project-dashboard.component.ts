@@ -6,7 +6,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { TaskGroup } from '../../model/task-group.types';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatListModule } from '@angular/material/list';
-import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 @Component({
   selector: 'app-project-dashboard',
   imports: [
@@ -25,7 +25,12 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 export class ProjectDashboardComponent implements OnInit, OnDestroy {
   taskGroups: TaskGroup[] | null = null;
   sidebarOpened: boolean = true;
-  constructor(private _projectDashboardService: ProjectDashboardService) {}
+  editingProjectId: number | null = null;
+  editingProjectDescription: string = '';
+  constructor(
+    private _projectDashboardService: ProjectDashboardService,
+    private _router: Router,
+  ) {}
 
   ngOnInit(): void {
     this._projectDashboardService.taskGroups$.subscribe((taskGroups) => {
@@ -35,12 +40,65 @@ export class ProjectDashboardComponent implements OnInit, OnDestroy {
 
   onProjectClicked(project: any) {}
 
-  onProjectEditClicked(project: any) {}
+  onProjectEditClicked(project: TaskGroup, event?: Event) {
+    event?.preventDefault();
+    event?.stopPropagation();
+    this.editingProjectId = project.taskGroupId ?? null;
+    this.editingProjectDescription = project.taskGroupDescription ?? '';
+  }
 
-  onProjectDeleteClicked(project: any) {}
+  saveProjectDescription(project: TaskGroup, event?: Event) {
+    event?.preventDefault();
+    event?.stopPropagation();
+
+    const trimmedDescription = this.editingProjectDescription.trim();
+    if (!trimmedDescription || !project.taskGroupId) {
+      this.cancelProjectEdit(event);
+      return;
+    }
+
+    if (trimmedDescription === project.taskGroupDescription) {
+      this.cancelProjectEdit(event);
+      return;
+    }
+
+    this._projectDashboardService.updateTaskGroup({
+      ...project,
+      taskGroupDescription: trimmedDescription,
+    });
+
+    this.editingProjectId = null;
+    this.editingProjectDescription = '';
+  }
+
+  cancelProjectEdit(event?: Event) {
+    event?.preventDefault();
+    event?.stopPropagation();
+    this.editingProjectId = null;
+    this.editingProjectDescription = '';
+  }
+
+  onProjectDeleteClicked(project: TaskGroup) {
+    if (!project.taskGroupId) {
+      return;
+    }
+
+    this._projectDashboardService.deleteTaskGroup(project);
+
+    if (this.editingProjectId === project.taskGroupId) {
+      this.cancelProjectEdit();
+    }
+  }
 
   addProject() {
-    this._projectDashboardService.addTaskGroup();
+    this._projectDashboardService.addTaskGroup().subscribe({
+      next: (taskGroups) => {
+        const lastTaskGroupId = taskGroups[taskGroups.length - 1]?.taskGroupId;
+        if (lastTaskGroupId) {
+          this._router.navigate(['/', lastTaskGroupId]);
+        }
+      },
+    });
   }
 
   ngOnDestroy(): void {}

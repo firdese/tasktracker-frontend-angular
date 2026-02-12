@@ -53,6 +53,6 @@ export class TaskDetailComponent implements OnInit {
   }
 
   onSaveDetail() {
-    this._taskService.updateTask(this.taskDetail);
+    this._taskService.updateTask(this.taskDetail, 'detail');
   }
 }

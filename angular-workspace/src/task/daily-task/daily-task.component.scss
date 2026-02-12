@@ -44,6 +44,54 @@
   color: #f8fafc;
 }
 
+.task-panel-title-row {
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
+}
+
+.project-edit-btn,
+.project-save-btn,
+.project-cancel-btn {
+  width: 1.8rem;
+  height: 1.8rem;
+  color: #cbd5e1;
+}
+
+.project-save-btn {
+  color: #86efac;
+}
+
+.project-cancel-btn {
+  color: #fca5a5;
+}
+
+.task-panel-project-name {
+  margin: 0.25rem 0 0;
+  color: #dbeafe;
+  font-size: 0.9rem;
+  line-height: 1.2;
+}
+
+.project-description-input {
+  width: 100%;
+  margin-top: 0.3rem;
+  min-height: 2.1rem;
+  border: 1px solid rgba(148, 163, 184, 0.45);
+  border-radius: 0.45rem;
+  background: rgba(15, 23, 42, 0.85);
+  color: #e2e8f0;
+  padding: 0.35rem 0.6rem;
+  font: inherit;
+  line-height: 1.25;
+}
+
+.project-description-input:focus {
+  outline: none;
+  border-color: rgba(56, 189, 248, 0.85);
+  box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.2);
+}
+
 .task-panel-subtitle {
   margin: 0.2rem 0 0;
   font-size: 0.82rem;

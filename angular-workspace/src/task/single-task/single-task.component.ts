@@ -20,7 +20,7 @@ export class SingleTaskComponent {
 
   updateTaskState(event: MatCheckboxChange) {
     this.task!.taskCompleted = event.checked;
-    this._taskService.updateTask(this.task);
+    this._taskService.updateTask(this.task, 'toggle');
   }
 
   deleteTask() {
