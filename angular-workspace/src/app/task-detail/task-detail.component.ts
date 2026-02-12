@@ -92,20 +92,6 @@ export class TaskDetailComponent implements OnInit {
     });
   }
 
-  onTaskGroupIdChanged(value: unknown) {
-    if (!this.taskDetail) {
-      return;
-    }
-
-    const parsedNumber = this.toNullableNumber(value);
-    if (parsedNumber === undefined) {
-      return;
-    }
-
-    this.taskDetail.taskGroupId = parsedNumber;
-    this._taskService.syncTaskInState(this.taskDetail);
-  }
-
   onOptionalNumberChanged(
     key: 'taskPriority' | 'taskSortOrder' | 'taskProgress',
     value: unknown,
