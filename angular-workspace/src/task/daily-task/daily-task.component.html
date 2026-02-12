@@ -1,18 +1,42 @@
-<div class="grid grid-cols-[auto_400px] h-full">
-  <div class="flex flex-col h-full min-h-0">
-    <div class="flex">
-      <button (click)="addTask()" mat-icon-button aria-label="Example icon button with a delete icon">
-        <mat-icon>add</mat-icon>
+<div class="grid h-full grid-cols-[minmax(0,1fr)_400px] gap-4 p-4">
+  <section class="flex min-h-0 flex-col rounded-xl border border-slate-200 shadow-sm">
+    <div class="flex items-center justify-between border-b border-slate-200 px-4 py-3">
+      <div>
+        <h2 class="text-lg font-semibold tracking-tight text-slate-100">Daily Tasks</h2>
+        <p class="text-sm text-slate-600">
+          {{ dailyTasks?.length ?? 0 }} task{{ (dailyTasks?.length ?? 0) === 1 ? '' : 's' }}
+        </p>
+      </div>
+
+      <button (click)="addTask()" mat-flat-button color="primary" class="!rounded-lg">
+        <mat-icon fontIcon="add"></mat-icon>
+        <span class="ml-1">New Task</span>
       </button>
     </div>
-    <div class="flex-1 overflow-y-auto">
-      <div *ngFor="let task of dailyTasks">
-        <app-single-task [task]="task" />
+
+    <div class="flex-1 overflow-y-auto p-3">
+      <div *ngIf="dailyTasks?.length; else emptyState" class="space-y-2">
+        <div *ngFor="let task of dailyTasks">
+          <app-single-task [task]="task" />
+        </div>
       </div>
+
+      <ng-template #emptyState>
+        <div class="flex h-full min-h-48 items-center justify-center rounded-lg border border-dashed border-slate-300">
+          <div class="text-center">
+            <p class="font-medium text-slate-700">No tasks yet</p>
+            <p class="mt-1 text-sm text-slate-500">Create your first task to get started.</p>
+          </div>
+        </div>
+      </ng-template>
     </div>
-    <div>{{ _taskService.animation$ | async }}</div>
-  </div>
-  <div class="h-full overflow-hidden">
-    <router-outlet />
+
+    <div class="border-t border-slate-200 px-4 py-2 text-xs text-slate-500">
+      Status: {{ _taskService.animation$ | async }}
+    </div>
+  </section>
+
+  <div class="h-full overflow-hidden rounded-xl border border-slate-200 shadow-sm">
+    <router-outlet></router-outlet>
   </div>
 </div>

@@ -1,10 +1,7 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { Task } from '../model/task.types';
-import { observableToBeFn } from 'rxjs/internal/testing/TestScheduler';
 import { HttpClient } from '@angular/common/http';
-import { error } from 'console';
-import { ProjectDashboardService } from '../app/project-dashboard/project-dashboard.service';
 import { ToastrService } from 'ngx-toastr';
 
 @Injectable({
@@ -14,23 +11,29 @@ export class TaskService {
   private baseTaskURL: string = 'http://localhost:5000/tasks';
   constructor(
     private _httpClient: HttpClient,
-    private _projectDashboardService: ProjectDashboardService,
     private _toastrService: ToastrService,
-  ) {
-    this.loadDailyTask();
-  }
+  ) {}
 
   loadTaskByTaskGroupId(taskGroupId: number) {
-    const taskGroup = this._projectDashboardService.taskGroups.value?.find(
-      (x) => x.taskGroupId === taskGroupId,
+    console.log('Loading tasks for group id:', taskGroupId);
+    this._httpClient.get<Task[]>(this.baseTaskURL).subscribe(
+      (tasks) => {
+        console.log(tasks);
+        this._dailyTask.next(
+          tasks.filter((task) => task.taskGroupId === taskGroupId),
+        );
+      },
+      (error) => {
+        console.log(error);
+        this._dailyTask.next([]);
+      },
     );
-    this.dailyTask.next(taskGroup?.tasks);
   }
 
   loadTaskDetailByTaskId(taskId: number) {
-    const task = this.dailyTask.value?.find((x) => x.taskId === taskId);
+    const task = this._dailyTask.value?.find((x) => x.taskId === taskId);
     if (task) {
-      this.taskDetail.next(task);
+      this._taskDetail.next(task);
     }
   }
 
@@ -42,11 +45,10 @@ export class TaskService {
     };
     this._httpClient
       .post<Task[]>(this.baseTaskURL, [newTask])
-      .subscribe((tasksCreated) =>
-        tasksCreated.forEach((taskCreated) => {
-          this.dailyTask.value?.push(taskCreated);
-        }),
-      );
+      .subscribe({
+        next: () => this.loadTaskByTaskGroupId(groupTaskId),
+        error: (error) => console.log(error),
+      });
   }
 
   deleteTask(task: Task | undefined) {
@@ -55,30 +57,30 @@ export class TaskService {
     }
     this._httpClient
       .delete<any>(this.baseTaskURL, { body: [task] })
-      .subscribe((response) => {
-        const deletedIndex = this.dailyTask.value?.findIndex(
+      .subscribe(() => {
+        const deletedIndex = this._dailyTask.value?.findIndex(
           (x) => x.taskId === task.taskId,
         );
-        if (deletedIndex) {
-          this.dailyTask.next(
-            this.dailyTask.value?.filter((_, i) => i !== deletedIndex),
+        if (deletedIndex !== undefined && deletedIndex >= 0) {
+          this._dailyTask.next(
+            this._dailyTask.value?.filter((_, i) => i !== deletedIndex),
           );
         }
       });
   }
 
-  dailyTask: BehaviorSubject<Task[] | undefined> = new BehaviorSubject<
+  private _dailyTask: BehaviorSubject<Task[] | undefined> = new BehaviorSubject<
     Task[] | undefined
   >(undefined);
 
-  taskDetail: BehaviorSubject<Task | undefined> = new BehaviorSubject<
+  private _taskDetail: BehaviorSubject<Task | undefined> = new BehaviorSubject<
     Task | undefined
   >(undefined);
 
   animation: BehaviorSubject<string> = new BehaviorSubject<string>('');
 
   get dailyTask$(): Observable<Task[] | undefined> {
-    return this.dailyTask.asObservable();
+    return this._dailyTask.asObservable();
   }
 
   get animation$(): Observable<string> {
@@ -86,12 +88,12 @@ export class TaskService {
   }
 
   get taskDetail$(): Observable<Task | undefined> {
-    return this.taskDetail.asObservable();
+    return this._taskDetail.asObservable();
   }
 
   loadDailyTask() {
     this._httpClient.get<Task[]>(this.baseTaskURL).subscribe(
-      (tasks) => this.dailyTask.next(tasks),
+      (tasks) => this._dailyTask.next(tasks),
       (error) => {
         console.log(error);
       },
@@ -103,11 +105,13 @@ export class TaskService {
       .put<Task[]>(this.baseTaskURL, [task])
       .subscribe((tasksEdited) => {
         tasksEdited.forEach((taskEdited) => {
-          const indexOfEditedTask = this.dailyTask.value?.findIndex(
+          const indexOfEditedTask = this._dailyTask.value?.findIndex(
             (x) => x.taskId === taskEdited.taskId,
           );
-          if (indexOfEditedTask) {
-            this.dailyTask.value?.splice(indexOfEditedTask, 1, taskEdited);
+          if (indexOfEditedTask !== undefined && indexOfEditedTask >= 0) {
+            const currentTasks = [...(this._dailyTask.value ?? [])];
+            currentTasks.splice(indexOfEditedTask, 1, taskEdited);
+            this._dailyTask.next(currentTasks);
           }
         });
 
@@ -124,6 +128,6 @@ export class TaskService {
   }
 
   updateTaskDetail(task: Task | undefined) {
-    this.taskDetail.next(task);
+    this._taskDetail.next(task);
   }
 }

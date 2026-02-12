@@ -1,14 +1,15 @@
 import { Component, OnInit } from '@angular/core';
 import { SingleTaskComponent } from '../single-task/single-task.component';
-import { NgFor } from '@angular/common';
+import { NgFor, NgIf } from '@angular/common';
 import { TaskService } from '../task.service';
 import { Task } from '../../model/task.types';
 import { AsyncPipe } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
 import { ActivatedRoute, RouterOutlet } from '@angular/router';
 @Component({
   selector: 'app-daily-task',
-  imports: [SingleTaskComponent, NgFor, AsyncPipe, MatIconModule, RouterOutlet],
+  imports: [SingleTaskComponent, NgFor, NgIf, AsyncPipe, MatIconModule, MatButtonModule, RouterOutlet],
   templateUrl: './daily-task.component.html',
   styleUrl: './daily-task.component.scss',
 })
