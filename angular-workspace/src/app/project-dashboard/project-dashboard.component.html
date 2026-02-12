@@ -1,19 +1,22 @@
 <mat-sidenav-container class="h-[calc(100vh-64px)] overflow-hidden">
-  <mat-sidenav #sidenav mode="side" [(opened)]="sidebarOpened" class="w-64 p-4">
-    <div class="flex justify-between items-center mb-4">
-      <h2 class="text-xl font-bold">Projects</h2>
-      <button mat-icon-button (click)="sidebarOpened = false">
-        <mat-icon>close</mat-icon>
-      </button>
+  <mat-sidenav #sidenav mode="side" [(opened)]="sidebarOpened" class="w-64 h-full p-4 flex flex-col overflow-hidden">
+    <div class="pb-2 flex-shrink-0">
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="text-xl font-bold">Projects</h2>
+        <button mat-icon-button (click)="sidebarOpened = false">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+
+      <div class="w-full">
+        <button (click)="addProject()" mat-stroked-button class="w-full !justify-start">
+          <mat-icon fontIcon="add"></mat-icon>
+          <span class="ml-2">New Project</span>
+        </button>
+      </div>
     </div>
 
-    <div class="flex flex-col w-full items-center">
-      <button (click)="addProject()" mat-icon-button>
-        <mat-icon fontIcon="add"></mat-icon>
-      </button>
-    </div>
-
-    <div class="h-full overflow-y-auto">
+    <div class="flex-1 min-h-0 overflow-y-auto">
       <mat-nav-list>
         <a mat-list-item *ngFor="let taskGroup of taskGroups" [routerLink]="[taskGroup.taskGroupId]"
           (mouseenter)="hoveredTask = taskGroup" (mouseleave)="hoveredTask = null">
