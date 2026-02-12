@@ -8,9 +8,10 @@ import { TaskService } from '../task.service';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { RouterLink } from '@angular/router';
+import { NgIf } from '@angular/common';
 @Component({
   selector: 'app-single-task',
-  imports: [MatCheckboxModule, MatIconModule, MatButtonModule, RouterLink],
+  imports: [MatCheckboxModule, MatIconModule, MatButtonModule, RouterLink, NgIf],
   templateUrl: './single-task.component.html',
   styleUrl: './single-task.component.scss',
 })

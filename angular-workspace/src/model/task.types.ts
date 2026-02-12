@@ -1,12 +1,20 @@
 export interface Task {
   taskId?: number;
   taskDescription?: string;
-  taskCreatedAtUtc?: string;
-  taskUpdatedAtUtc?: string;
+  taskStartAtUtc?: string | null;
+  taskEndAtUtc?: string | null;
   taskCompletedAtUtc?: string | null;
   taskDueAtUtc?: string | null;
-  taskDeletedAtUtc?: string | null;
   taskSortOrder?: number;
   taskPriority?: number;
+  taskProgress?: number | null;
+  taskDependencyTaskIds?: number[] | null;
   taskGroupId: number;
+
+  // meant for soft delete
+  taskDeletedAtUtc?: string | null;
+
+  //audit fields (created, updated)
+  taskCreatedAtUtc?: string;
+  taskUpdatedAtUtc?: string;
 }

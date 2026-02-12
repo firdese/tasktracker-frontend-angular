@@ -1,9 +1,9 @@
-<div class="task-page">
-  <section class="task-panel">
+<div class="task-page" [class.detail-mode]="isTaskDetailActive">
+  <section *ngIf="!isTaskDetailActive" class="task-panel">
     <div class="task-panel-head">
       <div>
         <div class="task-panel-title-row">
-          <h2 class="task-panel-title">Daily Tasks</h2>
+          <h2 class="task-panel-title">Task List</h2>
           <ng-container *ngIf="!editingProjectDescription; else editProjectDescriptionTemplate">
             <button
               mat-icon-button
@@ -49,7 +49,10 @@
         </ng-template>
 
         <p class="task-panel-subtitle">
-          {{ dailyTasks?.length ?? 0 }} task{{ (dailyTasks?.length ?? 0) === 1 ? '' : 's' }}
+          {{ sortedDailyTasks.length }} task{{ sortedDailyTasks.length === 1 ? '' : 's' }}
+          <span *ngIf="selectedFocusMode !== 'all'">
+            (filtered from {{ dailyTasks?.length ?? 0 }})
+          </span>
         </p>
       </div>
 
@@ -59,12 +62,167 @@
       </button>
     </div>
 
+    <div class="task-view-switch">
+      <button
+        mat-stroked-button
+        [class.is-active]="selectedView === DashboardView.List"
+        (click)="viewSelectionChanged(DashboardView.List)"
+      >
+        List
+      </button>
+      <button
+        mat-stroked-button
+        [class.is-active]="selectedView === DashboardView.Timeline"
+        (click)="viewSelectionChanged(DashboardView.Timeline)"
+      >
+        Timeline
+      </button>
+      <button
+        mat-stroked-button
+        [class.is-active]="selectedView === DashboardView.Gantt"
+        (click)="viewSelectionChanged(DashboardView.Gantt)"
+      >
+        Gantt
+      </button>
+    </div>
+
+    <div class="task-focus-switch">
+      <button
+        mat-stroked-button
+        [class.is-active]="selectedFocusMode === 'all'"
+        (click)="setFocusMode('all')"
+      >
+        All ({{ focusModeCounts.all }})
+      </button>
+      <button
+        mat-stroked-button
+        [class.is-active]="selectedFocusMode === 'overdue'"
+        (click)="setFocusMode('overdue')"
+      >
+        Overdue ({{ focusModeCounts.overdue }})
+      </button>
+      <button
+        mat-stroked-button
+        [class.is-active]="selectedFocusMode === 'today'"
+        (click)="setFocusMode('today')"
+      >
+        Today ({{ focusModeCounts.today }})
+      </button>
+      <button
+        mat-stroked-button
+        [class.is-active]="selectedFocusMode === 'week'"
+        (click)="setFocusMode('week')"
+      >
+        This Week ({{ focusModeCounts.week }})
+      </button>
+    </div>
+
     <div class="task-list-wrap">
-      <div *ngIf="dailyTasks?.length; else emptyState" class="task-list">
-        <div *ngFor="let task of dailyTasks">
-          <app-single-task [task]="task" />
+      <ng-container *ngIf="selectedView === DashboardView.List; else nonDailyView">
+        <div *ngIf="sortedDailyTasks.length; else emptyState" class="task-list">
+          <div *ngFor="let task of sortedDailyTasks">
+            <app-single-task [task]="task" />
+          </div>
         </div>
-      </div>
+      </ng-container>
+
+      <ng-template #nonDailyView>
+        <ng-container *ngIf="selectedView === DashboardView.Timeline; else ganttView">
+          <div *ngIf="timelineGroups.length; else emptyState" class="timeline-wrap">
+            <section *ngFor="let group of timelineGroups" class="timeline-group">
+              <header class="timeline-group-header">
+                <h3 class="timeline-group-title">{{ group.label }}</h3>
+                <span class="timeline-group-count">{{ group.tasks.length }}</span>
+              </header>
+
+              <div class="timeline-item-list">
+                <article *ngFor="let task of group.tasks" class="timeline-item" [class.is-complete]="!!task.taskCompletedAtUtc">
+                  <a class="timeline-main" [routerLink]="[task.taskId]" queryParamsHandling="preserve">
+                    <span class="timeline-kicker">Task #{{ task.taskId }}</span>
+                    <span class="timeline-title">{{ task.taskDescription || "Untitled task" }}</span>
+                    <span
+                      *ngIf="task.taskPriority !== null && task.taskPriority !== undefined"
+                      class="timeline-priority"
+                      [class.p1]="task.taskPriority === 1"
+                      [class.p2]="task.taskPriority === 2"
+                      [class.p3]="task.taskPriority === 3"
+                      [class.p4]="task.taskPriority === 4"
+                      [class.p5]="task.taskPriority === 5"
+                    >
+                      P{{ task.taskPriority }}
+                    </span>
+                  </a>
+
+                  <div class="timeline-meta">
+                    <span class="timeline-state">{{ getTaskStatusLabel(task) }}</span>
+                    <span class="timeline-caption">{{ getTaskTimelineCaption(task) }}</span>
+                  </div>
+
+                  <div class="timeline-actions">
+                    <button mat-icon-button (click)="toggleTaskCompletion(task)" [attr.aria-label]="task.taskCompletedAtUtc ? 'Mark as not done' : 'Mark as done'">
+                      <mat-icon [fontIcon]="task.taskCompletedAtUtc ? 'radio_button_unchecked' : 'check_circle'"></mat-icon>
+                    </button>
+                    <button mat-icon-button (click)="deleteTimelineTask(task)" aria-label="Delete task">
+                      <mat-icon fontIcon="delete"></mat-icon>
+                    </button>
+                  </div>
+                </article>
+              </div>
+            </section>
+          </div>
+        </ng-container>
+      </ng-template>
+
+      <ng-template #ganttView>
+        <div *ngIf="ganttRows.length; else emptyState" class="gantt-wrap">
+          <div class="gantt-legend">
+            <span class="gantt-legend-chip planned">Planned Range</span>
+            <span class="gantt-legend-chip progress">Progress Overlay</span>
+            <span class="gantt-legend-note">Planned uses Start-End. Overlay uses Progress %.</span>
+          </div>
+
+          <div class="gantt-header">
+            <div class="gantt-task-col">Task</div>
+            <div class="gantt-scale">
+              <div class="gantt-scale-cell" *ngFor="let column of ganttColumns">{{ column.label }}</div>
+            </div>
+          </div>
+
+          <div class="gantt-body">
+            <div class="gantt-row" *ngFor="let row of ganttRows">
+              <a class="gantt-task-cell" [routerLink]="[row.task.taskId]" queryParamsHandling="preserve">
+                <span class="gantt-task-title">{{ row.task.taskDescription || "Untitled task" }}</span>
+                <span class="gantt-task-subtitle">{{ row.startLabel }} - {{ row.endLabel }}</span>
+              </a>
+
+              <div class="gantt-track">
+                <div class="gantt-grid">
+                  <div class="gantt-grid-cell" *ngFor="let column of ganttColumns"></div>
+                </div>
+                <div class="gantt-bar" [style.left.%]="row.offsetPct" [style.width.%]="row.widthPct">
+                  <span class="gantt-bar-progress" [style.width.%]="row.progressPct"></span>
+                  <span class="gantt-bar-label">{{ row.durationDays }}d</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <section *ngIf="ganttUnscheduledTasks.length" class="gantt-unscheduled">
+            <h4 class="gantt-unscheduled-title">Missing Start/End</h4>
+            <p class="gantt-unscheduled-copy">These tasks are excluded from chart until both Start and End are set.</p>
+            <div class="gantt-unscheduled-list">
+              <a
+                *ngFor="let task of ganttUnscheduledTasks"
+                class="gantt-unscheduled-item"
+                [routerLink]="[task.taskId]"
+                queryParamsHandling="preserve"
+              >
+                #{{ task.taskId }} {{ task.taskDescription || "Untitled task" }}
+              </a>
+            </div>
+          </section>
+        </div>
+      </ng-template>
 
       <ng-template #emptyState>
         <div class="task-empty">
@@ -81,7 +239,7 @@
     </div>
   </section>
 
-  <aside class="task-detail-panel">
-    <router-outlet></router-outlet>
+  <aside class="task-detail-panel" [class.full-width]="isTaskDetailActive" [class.is-hidden]="!isTaskDetailActive">
+    <router-outlet (activate)="onTaskDetailActivated()" (deactivate)="onTaskDetailDeactivated()"></router-outlet>
   </aside>
 </div>

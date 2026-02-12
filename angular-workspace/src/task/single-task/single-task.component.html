@@ -5,9 +5,20 @@
     [checked]="!!task?.taskCompletedAtUtc"
   ></mat-checkbox>
 
-  <a class="task-main" [routerLink]="[task?.taskId]">
+  <a class="task-main" [routerLink]="[task?.taskId]" queryParamsHandling="preserve">
     <span class="task-kicker">Task #{{ task?.taskId }}</span>
     <span class="task-title">{{ task?.taskDescription || "Untitled task" }}</span>
+    <span
+      *ngIf="task?.taskPriority !== null && task?.taskPriority !== undefined"
+      class="task-priority"
+      [class.p1]="task?.taskPriority === 1"
+      [class.p2]="task?.taskPriority === 2"
+      [class.p3]="task?.taskPriority === 3"
+      [class.p4]="task?.taskPriority === 4"
+      [class.p5]="task?.taskPriority === 5"
+    >
+      P{{ task?.taskPriority }}
+    </span>
   </a>
 
   <div class="task-actions">

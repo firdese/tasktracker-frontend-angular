@@ -1,4 +1,6 @@
 export enum DashboardView {
   Kanban = 'Kanban',
-  Daily = 'Daily',
+  List = 'List',
+  Timeline = 'Timeline',
+  Gantt = 'Gantt',
 }

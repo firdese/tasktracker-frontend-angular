@@ -23,6 +23,7 @@
           class="project-list-item"
           *ngFor="let taskGroup of taskGroups"
           [routerLink]="[taskGroup.taskGroupId]"
+          queryParamsHandling="preserve"
           routerLinkActive="is-active"
         >
           <span class="project-title">

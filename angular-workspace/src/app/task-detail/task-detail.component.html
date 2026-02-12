@@ -1,21 +1,219 @@
 <ng-container *ngIf="taskDetail; else emptyDetail">
   <section class="detail-shell">
     <header class="detail-header">
-      <p class="detail-kicker">Task Editor</p>
-      <h3 class="detail-title">{{ taskDetail?.taskDescription || "Untitled task" }}</h3>
+      <div class="detail-head-row">
+        <p class="detail-kicker">Task Editor</p>
+        <button mat-stroked-button type="button" class="detail-back-btn" (click)="backToList()">
+          Back to List
+        </button>
+      </div>
+      <h3 class="detail-title">{{ taskDetail.taskDescription || "Untitled task" }}</h3>
     </header>
 
-    <div class="detail-grid">
-      <div class="field-label">Task ID</div>
-      <mat-form-field appearance="outline" class="detail-field">
-        <input matInput type="number" [value]="taskDetail?.taskId" readonly />
-      </mat-form-field>
+    <section class="detail-section">
+      <h4 class="detail-section-title">Core Fields</h4>
+      <div class="detail-grid">
+        <div class="field-block">
+          <label class="field-caption">Task ID</label>
+          <mat-form-field appearance="outline" class="detail-field">
+            <input matInput type="number" [ngModel]="taskDetail.taskId" readonly />
+          </mat-form-field>
+        </div>
 
-      <div class="field-label">Task Description</div>
-      <mat-form-field appearance="outline" class="detail-field">
-        <input matInput type="text" [value]="taskDetail?.taskDescription" (change)="updateTaskDescription($event)" />
-      </mat-form-field>
-    </div>
+        <div class="field-block">
+          <label class="field-caption">Group ID</label>
+          <mat-form-field appearance="outline" class="detail-field">
+            <input
+              matInput
+              type="number"
+              [ngModel]="taskDetail.taskGroupId"
+              (ngModelChange)="onTaskGroupIdChanged($event)"
+            />
+          </mat-form-field>
+        </div>
+
+        <div class="field-block">
+          <label class="field-caption">Sort Order</label>
+          <mat-form-field appearance="outline" class="detail-field">
+            <input
+              matInput
+              type="number"
+              [ngModel]="taskDetail.taskSortOrder"
+              (ngModelChange)="onOptionalNumberChanged('taskSortOrder', $event)"
+            />
+          </mat-form-field>
+        </div>
+
+        <div class="field-block">
+          <label class="field-caption">Priority</label>
+          <mat-form-field appearance="outline" class="detail-field priority-field">
+            <mat-select
+              panelClass="priority-panel"
+              [ngModel]="taskDetail.taskPriority"
+              (ngModelChange)="onOptionalNumberChanged('taskPriority', $event)"
+            >
+              <mat-select-trigger>
+                <span class="priority-pill" [class.none]="taskDetail.taskPriority === null || taskDetail.taskPriority === undefined">
+                  {{ getPriorityLabel(taskDetail.taskPriority) }}
+                </span>
+              </mat-select-trigger>
+              <mat-option [value]="null">
+                <span class="priority-option none">None</span>
+              </mat-option>
+              <mat-option *ngFor="let option of priorityOptions" [value]="option.value">
+                <span class="priority-option" [class.p1]="option.value === 1" [class.p2]="option.value === 2" [class.p3]="option.value === 3" [class.p4]="option.value === 4" [class.p5]="option.value === 5">
+                  {{ option.label }}
+                </span>
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+          <p class="field-help">Lower number means higher priority.</p>
+        </div>
+
+        <div class="field-block">
+          <label class="field-caption">Progress (%)</label>
+          <div class="progress-editor">
+            <input
+              class="progress-slider"
+              type="range"
+              min="0"
+              max="100"
+              step="1"
+              [ngModel]="taskDetail.taskProgress ?? 0"
+              (ngModelChange)="onProgressChanged($event)"
+            />
+            <span class="progress-chip">{{ taskDetail.taskProgress ?? 0 }}%</span>
+          </div>
+          <p class="field-help">Used by Gantt fill indicator (0 to 100).</p>
+        </div>
+
+        <div class="field-block full-span">
+          <label class="field-caption">Depends On Task IDs</label>
+          <mat-form-field appearance="outline" class="detail-field">
+            <input
+              matInput
+              type="text"
+              [ngModel]="dependencyTaskIdsInput"
+              (ngModelChange)="onDependencyIdsChanged($event)"
+            />
+          </mat-form-field>
+          <p class="field-help">Comma-separated IDs, example: 12, 15, 18.</p>
+        </div>
+
+        <div class="field-block full-span">
+          <label class="field-caption">Description</label>
+          <mat-form-field appearance="outline" class="detail-field">
+            <textarea matInput rows="3" [(ngModel)]="taskDetail.taskDescription"></textarea>
+          </mat-form-field>
+        </div>
+      </div>
+    </section>
+
+    <section class="detail-section">
+      <h4 class="detail-section-title">Dates</h4>
+      <div class="detail-grid">
+        <div class="field-block">
+          <label class="field-caption">Start (UTC)</label>
+          <mat-form-field appearance="outline" class="detail-field">
+            <input
+              matInput
+              [matDatepicker]="startAtPicker"
+              [ngModel]="dateInputValues.taskStartAtUtc"
+              (dateChange)="onDateChanged('taskStartAtUtc', $event.value)"
+            />
+            <mat-datepicker-toggle matIconSuffix [for]="startAtPicker"></mat-datepicker-toggle>
+            <mat-datepicker #startAtPicker></mat-datepicker>
+            <button mat-icon-button matSuffix type="button" (click)="clearNullableDate('taskStartAtUtc')" aria-label="Clear start date">
+              <mat-icon fontIcon="close"></mat-icon>
+            </button>
+          </mat-form-field>
+          <p class="field-help">Planned start date for timeline and Gantt range.</p>
+        </div>
+
+        <div class="field-block">
+          <label class="field-caption">End (UTC)</label>
+          <mat-form-field appearance="outline" class="detail-field">
+            <input
+              matInput
+              [matDatepicker]="endAtPicker"
+              [ngModel]="dateInputValues.taskEndAtUtc"
+              (dateChange)="onDateChanged('taskEndAtUtc', $event.value)"
+            />
+            <mat-datepicker-toggle matIconSuffix [for]="endAtPicker"></mat-datepicker-toggle>
+            <mat-datepicker #endAtPicker></mat-datepicker>
+            <button mat-icon-button matSuffix type="button" (click)="clearNullableDate('taskEndAtUtc')" aria-label="Clear end date">
+              <mat-icon fontIcon="close"></mat-icon>
+            </button>
+          </mat-form-field>
+          <p class="field-help">Planned finish date used for Gantt bar length.</p>
+        </div>
+
+        <div class="field-block">
+          <label class="field-caption">Due (UTC)</label>
+          <mat-form-field appearance="outline" class="detail-field">
+            <input
+              matInput
+              [matDatepicker]="dueAtPicker"
+              [ngModel]="dateInputValues.taskDueAtUtc"
+              (dateChange)="onDateChanged('taskDueAtUtc', $event.value)"
+            />
+            <mat-datepicker-toggle matIconSuffix [for]="dueAtPicker"></mat-datepicker-toggle>
+            <mat-datepicker #dueAtPicker></mat-datepicker>
+            <button mat-icon-button matSuffix type="button" (click)="clearNullableDate('taskDueAtUtc')" aria-label="Clear due date">
+              <mat-icon fontIcon="close"></mat-icon>
+            </button>
+          </mat-form-field>
+          <p class="field-help">Deadline/commitment date. Can differ from planned End.</p>
+        </div>
+
+        <div class="field-block">
+          <label class="field-caption">Completed (UTC)</label>
+          <mat-form-field appearance="outline" class="detail-field">
+            <input
+              matInput
+              [matDatepicker]="completedAtPicker"
+              [ngModel]="dateInputValues.taskCompletedAtUtc"
+              (dateChange)="onDateChanged('taskCompletedAtUtc', $event.value)"
+            />
+            <mat-datepicker-toggle matIconSuffix [for]="completedAtPicker"></mat-datepicker-toggle>
+            <mat-datepicker #completedAtPicker></mat-datepicker>
+            <button mat-icon-button matSuffix type="button" (click)="clearNullableDate('taskCompletedAtUtc')" aria-label="Clear completed date">
+              <mat-icon fontIcon="close"></mat-icon>
+            </button>
+          </mat-form-field>
+          <p class="field-help">Actual completion timestamp (toggles done status).</p>
+        </div>
+
+        <div class="field-block">
+          <label class="field-caption">Deleted (UTC)</label>
+          <mat-form-field appearance="outline" class="detail-field">
+            <input
+              matInput
+              [matDatepicker]="deletedAtPicker"
+              [ngModel]="dateInputValues.taskDeletedAtUtc"
+              (dateChange)="onDateChanged('taskDeletedAtUtc', $event.value)"
+            />
+            <mat-datepicker-toggle matIconSuffix [for]="deletedAtPicker"></mat-datepicker-toggle>
+            <mat-datepicker #deletedAtPicker></mat-datepicker>
+            <button mat-icon-button matSuffix type="button" (click)="clearNullableDate('taskDeletedAtUtc')" aria-label="Clear deleted date">
+              <mat-icon fontIcon="close"></mat-icon>
+            </button>
+          </mat-form-field>
+        </div>
+      </div>
+    </section>
+
+    <section class="detail-meta detail-section">
+      <h4 class="detail-section-title">System Metadata</h4>
+      <div class="detail-meta-row">
+        <span class="detail-meta-label">Created (UTC)</span>
+        <span class="detail-meta-value">{{ taskDetail.taskCreatedAtUtc ? (taskDetail.taskCreatedAtUtc | date: 'medium' : 'UTC') : 'N/A' }}</span>
+      </div>
+      <div class="detail-meta-row">
+        <span class="detail-meta-label">Updated (UTC)</span>
+        <span class="detail-meta-value">{{ taskDetail.taskUpdatedAtUtc ? (taskDetail.taskUpdatedAtUtc | date: 'medium' : 'UTC') : 'N/A' }}</span>
+      </div>
+    </section>
 
     <div class="detail-actions">
       <button mat-flat-button color="primary" (click)="onSaveDetail()">
