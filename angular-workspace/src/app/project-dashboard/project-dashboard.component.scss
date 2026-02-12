@@ -4,3 +4,71 @@
   height: 100%;
   overflow: hidden;
 }
+
+:host ::ng-deep .project-list-item .mdc-list-item__primary-text {
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.project-list {
+  padding-top: 0.25rem;
+}
+
+.project-list-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.25rem;
+  border-radius: 0.65rem;
+  color: #cbd5e1;
+  transition:
+    background-color 120ms ease,
+    color 120ms ease;
+}
+
+.project-list-item:hover {
+  background: rgba(148, 163, 184, 0.14);
+}
+
+.project-list-item.is-active {
+  background: rgba(148, 163, 184, 0.24);
+  color: #f8fafc;
+  font-weight: 600;
+}
+
+.project-title {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding-right: 0.25rem;
+}
+
+.delete-btn {
+  flex-shrink: 0;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 999px;
+  color: #ef4444;
+  opacity: 0;
+  transform: scale(0.92);
+  pointer-events: none;
+  transition:
+    opacity 120ms ease,
+    transform 120ms ease,
+    background-color 120ms ease;
+}
+
+.project-list-item:hover .delete-btn,
+.project-list-item:focus-within .delete-btn {
+  opacity: 1;
+  transform: scale(1);
+  pointer-events: auto;
+}
+
+.delete-btn:hover {
+  background: rgba(239, 68, 68, 0.12);
+}

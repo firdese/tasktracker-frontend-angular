@@ -1,42 +1,42 @@
-<div class="grid h-full grid-cols-[minmax(0,1fr)_400px] gap-4 p-4">
-  <section class="flex min-h-0 flex-col rounded-xl border border-slate-200 shadow-sm">
-    <div class="flex items-center justify-between border-b border-slate-200 px-4 py-3">
+<div class="task-page">
+  <section class="task-panel">
+    <div class="task-panel-head">
       <div>
-        <h2 class="text-lg font-semibold tracking-tight text-slate-100">Daily Tasks</h2>
-        <p class="text-sm text-slate-600">
+        <h2 class="task-panel-title">Daily Tasks</h2>
+        <p class="task-panel-subtitle">
           {{ dailyTasks?.length ?? 0 }} task{{ (dailyTasks?.length ?? 0) === 1 ? '' : 's' }}
         </p>
       </div>
 
-      <button (click)="addTask()" mat-flat-button color="primary" class="!rounded-lg">
+      <button (click)="addTask()" mat-flat-button color="primary" class="task-add-btn">
         <mat-icon fontIcon="add"></mat-icon>
         <span class="ml-1">New Task</span>
       </button>
     </div>
 
-    <div class="flex-1 overflow-y-auto p-3">
-      <div *ngIf="dailyTasks?.length; else emptyState" class="space-y-2">
+    <div class="task-list-wrap">
+      <div *ngIf="dailyTasks?.length; else emptyState" class="task-list">
         <div *ngFor="let task of dailyTasks">
           <app-single-task [task]="task" />
         </div>
       </div>
 
       <ng-template #emptyState>
-        <div class="flex h-full min-h-48 items-center justify-center rounded-lg border border-dashed border-slate-300">
+        <div class="task-empty">
           <div class="text-center">
-            <p class="font-medium text-slate-700">No tasks yet</p>
-            <p class="mt-1 text-sm text-slate-500">Create your first task to get started.</p>
+            <p class="task-empty-title">No tasks yet</p>
+            <p class="task-empty-copy">Create your first task to get started.</p>
           </div>
         </div>
       </ng-template>
     </div>
 
-    <div class="border-t border-slate-200 px-4 py-2 text-xs text-slate-500">
+    <div class="task-panel-foot">
       Status: {{ _taskService.animation$ | async }}
     </div>
   </section>
 
-  <div class="h-full overflow-hidden rounded-xl border border-slate-200 shadow-sm">
+  <aside class="task-detail-panel">
     <router-outlet></router-outlet>
-  </div>
+  </aside>
 </div>

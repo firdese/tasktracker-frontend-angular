@@ -17,20 +17,26 @@
     </div>
 
     <div class="flex-1 min-h-0 overflow-y-auto">
-      <mat-nav-list>
-        <a mat-list-item *ngFor="let taskGroup of taskGroups" [routerLink]="[taskGroup.taskGroupId]"
-          (mouseenter)="hoveredTask = taskGroup" (mouseleave)="hoveredTask = null">
-
-          <span class="truncate flex-1">
+      <mat-nav-list class="project-list">
+        <a
+          mat-list-item
+          class="project-list-item"
+          *ngFor="let taskGroup of taskGroups"
+          [routerLink]="[taskGroup.taskGroupId]"
+          routerLinkActive="is-active"
+        >
+          <span class="project-title">
             {{ taskGroup.taskGroupDescription }}
           </span>
 
-          <ng-container *ngIf="hoveredTask === taskGroup">
-            <button (click)="onProjectDeleteClicked(taskGroup); $event.stopPropagation(); $event.preventDefault();"
-              mat-icon-button>
-              <mat-icon fontIcon="delete"></mat-icon>
-            </button>
-          </ng-container>
+          <button
+            class="delete-btn"
+            (click)="onProjectDeleteClicked(taskGroup); $event.stopPropagation(); $event.preventDefault();"
+            mat-icon-button
+            aria-label="Delete project"
+          >
+            <mat-icon fontIcon="delete"></mat-icon>
+          </button>
         </a>
       </mat-nav-list>
     </div>

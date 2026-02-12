@@ -1,20 +1,35 @@
-<ng-container *ngIf="taskDetail">
-  <div class="grid grid-cols-2 gap-3 row items-center">
-    <div>Task ID</div>
-    <div class="flex items-center"><mat-form-field>
-        <input matInput type="number" [value]="taskDetail?.taskId" [readonly]="true"
-          (change)="updateTaskDescription($event)" />
-      </mat-form-field></div>
-    <div>Task Description</div>
-    <div class="flex items-center">
-      <mat-form-field>
+<ng-container *ngIf="taskDetail; else emptyDetail">
+  <section class="detail-shell">
+    <header class="detail-header">
+      <p class="detail-kicker">Task Editor</p>
+      <h3 class="detail-title">{{ taskDetail?.taskDescription || "Untitled task" }}</h3>
+    </header>
+
+    <div class="detail-grid">
+      <div class="field-label">Task ID</div>
+      <mat-form-field appearance="outline" class="detail-field">
+        <input matInput type="number" [value]="taskDetail?.taskId" readonly />
+      </mat-form-field>
+
+      <div class="field-label">Task Description</div>
+      <mat-form-field appearance="outline" class="detail-field">
         <input matInput type="text" [value]="taskDetail?.taskDescription" (change)="updateTaskDescription($event)" />
       </mat-form-field>
     </div>
-  </div>
-  <div class="flex justify-end mt-2">
-    <button mat-icon-button (click)="onSaveDetail()">
-      <mat-icon fontIcon="save"></mat-icon>
-    </button>
-  </div>
+
+    <div class="detail-actions">
+      <button mat-flat-button color="primary" (click)="onSaveDetail()">
+        <mat-icon fontIcon="save"></mat-icon>
+        Save changes
+      </button>
+    </div>
+  </section>
 </ng-container>
+
+<ng-template #emptyDetail>
+  <section class="detail-shell empty">
+    <p class="detail-kicker">Task Editor</p>
+    <h3 class="detail-title">Select a task</h3>
+    <p class="detail-copy">Choose a task from the list to edit its details.</p>
+  </section>
+</ng-template>

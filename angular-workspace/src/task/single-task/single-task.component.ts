@@ -1,36 +1,22 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, inject } from '@angular/core';
 import {
   MatCheckboxChange,
   MatCheckboxModule,
 } from '@angular/material/checkbox';
 import { Task } from '../../model/task.types';
 import { TaskService } from '../task.service';
-import { FormsModule } from '@angular/forms';
-import { MatInputModule } from '@angular/material/input';
-import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { RouterLink } from '@angular/router';
-import { MatListModule } from '@angular/material/list';
 @Component({
   selector: 'app-single-task',
-  imports: [
-    MatCheckboxModule,
-    FormsModule,
-    MatInputModule,
-    MatFormFieldModule,
-    MatIconModule,
-    MatButtonModule,
-    MatListModule,
-    RouterLink,
-  ],
+  imports: [MatCheckboxModule, MatIconModule, MatButtonModule, RouterLink],
   templateUrl: './single-task.component.html',
   styleUrl: './single-task.component.scss',
 })
 export class SingleTaskComponent {
   @Input() task: Task | undefined = undefined;
-
-  constructor(private _taskService: TaskService) {}
+  private _taskService = inject(TaskService);
 
   updateTaskState(event: MatCheckboxChange) {
     this.task!.taskCompleted = event.checked;

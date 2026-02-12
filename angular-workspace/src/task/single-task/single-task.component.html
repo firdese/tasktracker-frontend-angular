@@ -1,21 +1,22 @@
-<div class="flex items-center justify-center">
+<article class="task-item" [class.is-complete]="task?.taskCompleted">
   <mat-checkbox
+    class="task-checkbox"
     (change)="updateTaskState($event)"
     [checked]="task?.taskCompleted"
   ></mat-checkbox>
-  <div class="flex items-center w-full">
-    <mat-nav-list class="flex items-center w-full">
-      <mat-list-item class="flex items-center w-full">
-        <a class="flex items-center w-full" [routerLink]="[task?.taskId]">
-          {{ task?.taskDescription }}
-        </a>
-      </mat-list-item>
-    </mat-nav-list>
-  </div>
 
-  <div class="flex items-start">
-    <button (click)="deleteTask()" mat-icon-button>
+  <a class="task-main" [routerLink]="[task?.taskId]">
+    <span class="task-kicker">Task #{{ task?.taskId }}</span>
+    <span class="task-title">{{ task?.taskDescription || "Untitled task" }}</span>
+  </a>
+
+  <div class="task-actions">
+    <span class="task-state" [class.done]="task?.taskCompleted">
+      {{ task?.taskCompleted ? "Done" : "In progress" }}
+    </span>
+
+    <button class="task-delete" (click)="deleteTask()" mat-icon-button aria-label="Delete task">
       <mat-icon fontIcon="delete"></mat-icon>
     </button>
   </div>
-</div>
+</article>

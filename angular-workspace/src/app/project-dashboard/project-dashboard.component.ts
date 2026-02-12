@@ -6,7 +6,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { TaskGroup } from '../../model/task-group.types';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatListModule } from '@angular/material/list';
-import { RouterLink, RouterOutlet } from '@angular/router';
+import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 @Component({
   selector: 'app-project-dashboard',
   imports: [
@@ -17,13 +17,13 @@ import { RouterLink, RouterOutlet } from '@angular/router';
     MatListModule,
     RouterOutlet,
     RouterLink,
+    RouterLinkActive,
   ],
   templateUrl: './project-dashboard.component.html',
   styleUrl: './project-dashboard.component.scss',
 })
 export class ProjectDashboardComponent implements OnInit, OnDestroy {
   taskGroups: TaskGroup[] | null = null;
-  hoveredTask: TaskGroup | null = null;
   sidebarOpened: boolean = true;
   constructor(private _projectDashboardService: ProjectDashboardService) {}
 
