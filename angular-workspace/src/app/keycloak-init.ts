@@ -1,15 +1,16 @@
 import Keycloak from 'keycloak-js';
+import { environment } from '../environments/environment';
 
 const keycloak = new Keycloak({
-  url: 'http://localhost:8080',   // Keycloak server
-  realm: 'myrealm',               // Your realm
-  clientId: 'task-frontend',             // Your client
+  url: environment.keycloak.url,
+  realm: environment.keycloak.realm,
+  clientId: environment.keycloak.clientId,
 });
 
 export function initializeKeycloak(): Promise<boolean> {
   return keycloak.init({
-    onLoad: 'login-required',     // Force login on app load
-    checkLoginIframe: false,      // Disable iframe session check
+    onLoad: 'login-required',
+    checkLoginIframe: false,
   });
 }
 
