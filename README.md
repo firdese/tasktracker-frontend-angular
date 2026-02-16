@@ -48,3 +48,5 @@ A task management frontend built to:
 - [ ] Add lazy loading modules
 - [ ] Add production build configuration
 
+Backend repository:
+https://github.com/firdese/back-end-journey
