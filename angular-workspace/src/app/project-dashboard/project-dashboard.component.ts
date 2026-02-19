@@ -92,10 +92,10 @@ export class ProjectDashboardComponent implements OnInit, OnDestroy {
 
   addProject() {
     this._projectDashboardService.addTaskGroup().subscribe({
-      next: (taskGroups) => {
-        const lastTaskGroupId = taskGroups[taskGroups.length - 1]?.taskGroupId;
-        if (lastTaskGroupId) {
-          this._router.navigate(['/', lastTaskGroupId]);
+      next: (createdTaskGroups) => {
+        const createdTaskGroupId = createdTaskGroups[0]?.taskGroupId;
+        if (createdTaskGroupId) {
+          this._router.navigate(['/', createdTaskGroupId]);
         }
       },
     });
