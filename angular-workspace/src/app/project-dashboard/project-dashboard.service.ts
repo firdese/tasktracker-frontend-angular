@@ -1,10 +1,9 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, Observable, throwError } from 'rxjs';
 import { TaskGroup } from '../../model/task-group.types';
 import { HttpClient } from '@angular/common/http';
 import { ToastrService } from 'ngx-toastr';
-import { catchError, switchMap, tap } from 'rxjs/operators';
-import { throwError } from 'rxjs';
+import { catchError, tap } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root',
@@ -29,21 +28,23 @@ export class ProjectDashboardService {
   loadTaskGroups() {
     this._httpClient
       .get<TaskGroup[]>(this.baseTaskGroupUrl)
-      .subscribe((taskGroups) => {
-        this.taskGroups.next(taskGroups);
+      .subscribe({
+        next: (taskGroups) => {
+          this.taskGroups.next(taskGroups);
+        },
+        error: () => {
+          this._toastrService.error('Could not load projects');
+        },
       });
   }
 
   addTaskGroup(): Observable<TaskGroup[]> {
     const newTaskGroup: TaskGroup = { taskGroupDescription: 'new task group' };
     return this._httpClient
-      .post<void>(this.baseTaskGroupUrl, [newTaskGroup])
+      .post<TaskGroup[]>(this.baseTaskGroupUrl, [newTaskGroup])
       .pipe(
-        switchMap(() => {
-          return this._httpClient.get<TaskGroup[]>(this.baseTaskGroupUrl);
-        }),
-        tap((taskGroups) => {
-          this.taskGroups.next(taskGroups);
+        tap((createdTaskGroups) => {
+          this.upsertTaskGroups(createdTaskGroups);
         }),
         catchError((error) => {
           this._toastrService.error('Could not create project');
@@ -56,22 +57,8 @@ export class ProjectDashboardService {
     this._httpClient
       .put<TaskGroup[]>(this.baseTaskGroupUrl, [taskGroup])
       .subscribe({
-        next: (taskGroupsUpdated) => {
-          if (!taskGroupsUpdated.length) {
-            return;
-          }
-
-          const updatedTaskGroup = taskGroupsUpdated[0];
-          const currentTaskGroups = [...(this.taskGroups.value ?? [])];
-          const updatedIndex = currentTaskGroups.findIndex(
-            (x) => x.taskGroupId === updatedTaskGroup.taskGroupId,
-          );
-
-          if (updatedIndex >= 0) {
-            currentTaskGroups.splice(updatedIndex, 1, updatedTaskGroup);
-            this.taskGroups.next(currentTaskGroups);
-          }
-
+        next: (updatedTaskGroups) => {
+          this.upsertTaskGroups(updatedTaskGroups);
           this._toastrService.success('Project updated');
         },
         error: () => {
@@ -86,18 +73,55 @@ export class ProjectDashboardService {
     }
 
     this._httpClient
-      .delete<void>(this.baseTaskGroupUrl, { body: [taskGroup] })
+      .delete<number[]>(this.baseTaskGroupUrl, { body: [taskGroup.taskGroupId] })
       .subscribe({
-        next: () => {
-          const remainingTaskGroups = (this.taskGroups.value ?? []).filter(
-            (group) => group.taskGroupId !== taskGroup.taskGroupId,
-          );
-          this.taskGroups.next(remainingTaskGroups);
+        next: (deletedTaskGroupIds) => {
+          this.removeTaskGroups(deletedTaskGroupIds);
           this._toastrService.success('Project deleted');
         },
         error: () => {
           this._toastrService.error('Could not delete project');
         },
       });
+  }
+
+  private upsertTaskGroups(taskGroupsToUpsert: TaskGroup[]): void {
+    if (!taskGroupsToUpsert.length) {
+      return;
+    }
+
+    const currentTaskGroups = [...(this.taskGroups.value ?? [])];
+
+    taskGroupsToUpsert.forEach((taskGroupToUpsert) => {
+      if (!taskGroupToUpsert.taskGroupId) {
+        return;
+      }
+
+      const existingTaskGroupIndex = currentTaskGroups.findIndex(
+        (taskGroup) => taskGroup.taskGroupId === taskGroupToUpsert.taskGroupId,
+      );
+
+      if (existingTaskGroupIndex >= 0) {
+        currentTaskGroups.splice(existingTaskGroupIndex, 1, taskGroupToUpsert);
+        return;
+      }
+
+      currentTaskGroups.push(taskGroupToUpsert);
+    });
+
+    this.taskGroups.next(currentTaskGroups);
+  }
+
+  private removeTaskGroups(taskGroupIdsToDelete: number[]): void {
+    if (!taskGroupIdsToDelete.length) {
+      return;
+    }
+
+    const taskGroupIdsSet = new Set(taskGroupIdsToDelete);
+    const remainingTaskGroups = (this.taskGroups.value ?? []).filter(
+      (taskGroup) => !taskGroup.taskGroupId || !taskGroupIdsSet.has(taskGroup.taskGroupId),
+    );
+
+    this.taskGroups.next(remainingTaskGroups);
   }
 }
