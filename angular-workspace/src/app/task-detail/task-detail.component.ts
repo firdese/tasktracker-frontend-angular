@@ -12,6 +12,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatOptionModule } from '@angular/material/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
+import { combineLatest } from 'rxjs';
 
 type NullableTaskDateKey =
   | 'taskStartAtUtc'
@@ -40,6 +41,7 @@ type EditableTaskDateKey = NullableTaskDateKey;
 })
 export class TaskDetailComponent implements OnInit {
   taskDetail: Task | undefined;
+  private _currentTaskId: number | null = null;
   dependencyTaskIdsInput: string = '';
   readonly localTimeZone: string =
     Intl.DateTimeFormat().resolvedOptions().timeZone || 'Local time';
@@ -71,28 +73,43 @@ export class TaskDetailComponent implements OnInit {
       const taskId = params.get('taskId');
       if (taskId) {
         const parsedTaskId = Number.parseInt(taskId, 10);
-        if (!Number.isNaN(parsedTaskId)) {
+        if (!Number.isNaN(parsedTaskId) && parsedTaskId > 0) {
+          this._currentTaskId = parsedTaskId;
           this._taskService.loadTaskDetailByTaskId(parsedTaskId);
           return;
         }
       }
 
+      this._currentTaskId = null;
       this._taskService.updateTaskDetail(undefined);
+      this.backToList();
     });
-    this._taskService.taskDetail$.subscribe((taskDetail) => {
-      this.taskDetail = structuredClone(taskDetail);
-      this.dependencyTaskIdsInput = (
-        this.taskDetail?.taskDependencyTaskIds ?? []
-      ).join(', ');
-      this.dateInputValues = {
-        taskStartAtUtc: this.toDateObject(this.taskDetail?.taskStartAtUtc),
-        taskEndAtUtc: this.toDateObject(this.taskDetail?.taskEndAtUtc),
-        taskDueAtUtc: this.toDateObject(this.taskDetail?.taskDueAtUtc),
-        taskCompletedAtUtc: this.toDateObject(this.taskDetail?.taskCompletedAtUtc),
-        taskDeletedAtUtc: this.toDateObject(this.taskDetail?.taskDeletedAtUtc),
-      };
-      this._changeDetectorRef.markForCheck();
-    });
+
+    combineLatest([this._taskService.taskDetail$, this._taskService.dailyTask$]).subscribe(
+      ([taskDetail, dailyTasks]) => {
+        if (
+          this._currentTaskId &&
+          dailyTasks !== undefined &&
+          !taskDetail
+        ) {
+          this.backToList();
+          return;
+        }
+
+        this.taskDetail = structuredClone(taskDetail);
+        this.dependencyTaskIdsInput = (
+          this.taskDetail?.taskDependencyTaskIds ?? []
+        ).join(', ');
+        this.dateInputValues = {
+          taskStartAtUtc: this.toDateObject(this.taskDetail?.taskStartAtUtc),
+          taskEndAtUtc: this.toDateObject(this.taskDetail?.taskEndAtUtc),
+          taskDueAtUtc: this.toDateObject(this.taskDetail?.taskDueAtUtc),
+          taskCompletedAtUtc: this.toDateObject(this.taskDetail?.taskCompletedAtUtc),
+          taskDeletedAtUtc: this.toDateObject(this.taskDetail?.taskDeletedAtUtc),
+        };
+        this._changeDetectorRef.markForCheck();
+      },
+    );
   }
 
   onOptionalNumberChanged(

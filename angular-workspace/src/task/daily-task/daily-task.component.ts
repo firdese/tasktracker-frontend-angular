@@ -106,7 +106,12 @@ export class DailyTaskComponent implements OnInit {
     this.route.paramMap.subscribe((params) => {
       const taskGroupId = params.get('groupTaskId');
       if (taskGroupId) {
-        this.groupTaskId = parseInt(taskGroupId);
+        const parsedTaskGroupId = Number(taskGroupId);
+        if (!Number.isInteger(parsedTaskGroupId) || parsedTaskGroupId <= 0) {
+          this._router.navigate(['/']);
+          return;
+        }
+        this.groupTaskId = parsedTaskGroupId;
         this._taskService.loadTaskByTaskGroupId(this.groupTaskId);
         this.refreshActiveTaskGroup();
       }
@@ -326,8 +331,18 @@ export class DailyTaskComponent implements OnInit {
 
   private refreshActiveTaskGroup(taskGroups?: TaskGroup[] | null) {
     const groups = taskGroups ?? this._projectDashboardService.taskGroups.value;
+    if (groups === null) {
+      return;
+    }
+
     this.activeTaskGroup =
       groups?.find((group) => group.taskGroupId === this.groupTaskId) ?? null;
+
+    if (!this.activeTaskGroup && this.groupTaskId) {
+      this._router.navigate(['/'], { queryParamsHandling: 'preserve' });
+      return;
+    }
+
     if (!this.editingProjectDescription) {
       this.projectDescriptionDraft =
         this.activeTaskGroup?.taskGroupDescription ?? '';
