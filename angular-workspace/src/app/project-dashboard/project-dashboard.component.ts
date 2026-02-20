@@ -83,7 +83,19 @@ export class ProjectDashboardComponent implements OnInit, OnDestroy {
       return;
     }
 
-    this._projectDashboardService.deleteTaskGroup(project);
+    const deletedTaskGroupId = project.taskGroupId;
+    const isDeletingActiveProject = this._router.url
+      .split('?')[0]
+      .split('/')
+      .some((segment) => segment === `${deletedTaskGroupId}`);
+
+    this._projectDashboardService.deleteTaskGroup(project).subscribe({
+      next: () => {
+        if (isDeletingActiveProject) {
+          this._router.navigate(['/']);
+        }
+      },
+    });
 
     if (this.editingProjectId === project.taskGroupId) {
       this.cancelProjectEdit();

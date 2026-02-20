@@ -67,22 +67,23 @@ export class ProjectDashboardService {
       });
   }
 
-  deleteTaskGroup(taskGroup: TaskGroup) {
+  deleteTaskGroup(taskGroup: TaskGroup): Observable<number[]> {
     if (!taskGroup.taskGroupId) {
-      return;
+      return throwError(() => new Error('Task group id is required for deletion'));
     }
 
-    this._httpClient
+    return this._httpClient
       .delete<number[]>(this.baseTaskGroupUrl, { body: [taskGroup.taskGroupId] })
-      .subscribe({
-        next: (deletedTaskGroupIds) => {
+      .pipe(
+        tap((deletedTaskGroupIds) => {
           this.removeTaskGroups(deletedTaskGroupIds);
           this._toastrService.success('Project deleted');
-        },
-        error: () => {
+        }),
+        catchError((error) => {
           this._toastrService.error('Could not delete project');
-        },
-      });
+          return throwError(() => error);
+        }),
+      );
   }
 
   private upsertTaskGroups(taskGroupsToUpsert: TaskGroup[]): void {
