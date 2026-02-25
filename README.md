@@ -1,10 +1,8 @@
-# Frontend Journey
+# TaskTracker Frontend (Angular)
 
-This repository contains frontend-focused projects and experiments
-demonstrating UI architecture, state management, and scalable
+This repository hosts development for TaskTracker UI primarily using Angular.
+Also demonstrates UI architecture, state management, and scalable
 component design.
-
-Current main project: TaskTracker UI
 
 ## What This Repository Demonstrates
 
@@ -46,13 +44,5 @@ A task management frontend built to:
 2. ng serve
 3. Navigate to http://localhost:4200
 
-## Roadmap
-
-- [ ] Improve design consistency
-- [ ] Add unit testing
-- [ ] Improve state management pattern
-- [ ] Add lazy loading modules
-- [ ] Add production build configuration
-
 Backend repository:
-https://github.com/firdese/back-end-journey
+https://github.com/firdese/tasktracker-backend-aspnetcore
