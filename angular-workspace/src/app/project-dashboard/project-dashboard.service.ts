@@ -26,16 +26,14 @@ export class ProjectDashboardService {
   }
 
   loadTaskGroups() {
-    this._httpClient
-      .get<TaskGroup[]>(this.baseTaskGroupUrl)
-      .subscribe({
-        next: (taskGroups) => {
-          this.taskGroups.next(taskGroups);
-        },
-        error: () => {
-          this._toastrService.error('Could not load projects');
-        },
-      });
+    this._httpClient.get<TaskGroup[]>(this.baseTaskGroupUrl).subscribe({
+      next: (taskGroups) => {
+        this.taskGroups.next(taskGroups);
+      },
+      error: (error) => {
+        console.error('Failed to load projects', error);
+      },
+    });
   }
 
   addTaskGroup(): Observable<TaskGroup[]> {
@@ -69,11 +67,15 @@ export class ProjectDashboardService {
 
   deleteTaskGroup(taskGroup: TaskGroup): Observable<number[]> {
     if (!taskGroup.taskGroupId) {
-      return throwError(() => new Error('Task group id is required for deletion'));
+      return throwError(
+        () => new Error('Task group id is required for deletion'),
+      );
     }
 
     return this._httpClient
-      .delete<number[]>(this.baseTaskGroupUrl, { body: [taskGroup.taskGroupId] })
+      .delete<
+        number[]
+      >(this.baseTaskGroupUrl, { body: [taskGroup.taskGroupId] })
       .pipe(
         tap((deletedTaskGroupIds) => {
           this.removeTaskGroups(deletedTaskGroupIds);
@@ -120,7 +122,8 @@ export class ProjectDashboardService {
 
     const taskGroupIdsSet = new Set(taskGroupIdsToDelete);
     const remainingTaskGroups = (this.taskGroups.value ?? []).filter(
-      (taskGroup) => !taskGroup.taskGroupId || !taskGroupIdsSet.has(taskGroup.taskGroupId),
+      (taskGroup) =>
+        !taskGroup.taskGroupId || !taskGroupIdsSet.has(taskGroup.taskGroupId),
     );
 
     this.taskGroups.next(remainingTaskGroups);
