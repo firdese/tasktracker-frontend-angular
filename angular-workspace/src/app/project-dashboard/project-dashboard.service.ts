@@ -13,9 +13,7 @@ export class ProjectDashboardService {
   constructor(
     private _httpClient: HttpClient,
     private _toastrService: ToastrService,
-  ) {
-    this.loadTaskGroups();
-  }
+  ) {}
 
   taskGroups: BehaviorSubject<TaskGroup[] | null> = new BehaviorSubject<
     TaskGroup[] | null
