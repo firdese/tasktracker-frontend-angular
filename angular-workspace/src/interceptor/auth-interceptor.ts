@@ -1,8 +1,8 @@
 import { HttpInterceptorFn } from '@angular/common/http';
-import { keycloak } from '../app/keycloak-init';
+import { getAccessToken } from '../app/auth-session';
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
-  const token = keycloak.token;
+  const token = getAccessToken();
 
   if (token) {
     const cloned = req.clone({

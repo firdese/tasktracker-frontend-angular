@@ -1,8 +1,12 @@
 export const environment = {
   production: false,
-  keycloak: {
-    url: 'http://localhost:8080',
-    realm: 'myrealm',
-    clientId: 'task-frontend',
+  api: {
+    baseUrl: 'https://localhost:32769',
+  },
+  auth: {
+    issuer: 'https://issuer',
+    projectRef: 'project-ref',
+    storageKey: 'sb-project-ref-auth-token',
+    anonKey: '',
   },
 };
