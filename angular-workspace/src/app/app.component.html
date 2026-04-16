@@ -1,5 +1,5 @@
 <div class="grid grid-cols-[auto] grid-rows-[auto_1fr] h-screen">
-  <app-main-toolbar />
+  <app-main-toolbar *ngIf="showToolbar" />
   <div class="row-start-2">
     <router-outlet />
   </div>

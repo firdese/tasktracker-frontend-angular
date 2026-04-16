@@ -1,0 +1,52 @@
+<div class="login-page">
+  <div class="login-backdrop"></div>
+
+  <mat-card class="login-card">
+    <div class="login-brand">
+      <div class="brand-mark">TT</div>
+      <div>
+        <p class="eyebrow">Task Tracker</p>
+        <h1>Sign in to continue</h1>
+      </div>
+    </div>
+
+    <p class="login-copy">
+      Use your Supabase account to access your projects and tasks.
+    </p>
+
+    <div *ngIf="!hasAnonKey" class="config-warning">
+      Add <code>environment.auth.anonKey</code> before password sign-in can work.
+    </div>
+
+    <form class="login-form" (ngSubmit)="onSubmit()">
+      <mat-form-field appearance="outline">
+        <mat-label>Email</mat-label>
+        <input
+          matInput
+          type="email"
+          name="email"
+          [(ngModel)]="email"
+          autocomplete="email"
+          required
+        />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Password</mat-label>
+        <input
+          matInput
+          type="password"
+          name="password"
+          [(ngModel)]="password"
+          autocomplete="current-password"
+          required
+        />
+      </mat-form-field>
+
+      <button mat-flat-button class="login-submit" type="submit" [disabled]="isSubmitting">
+        <mat-spinner *ngIf="isSubmitting" diameter="18"></mat-spinner>
+        <span *ngIf="!isSubmitting">Sign in</span>
+      </button>
+    </form>
+  </mat-card>
+</div>

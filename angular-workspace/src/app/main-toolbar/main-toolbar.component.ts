@@ -4,7 +4,8 @@ import { SoftwareMetadataService } from '../software-metadata.service';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatMenuModule } from '@angular/material/menu';
-import { keycloak } from '../keycloak-init';
+import { Router } from '@angular/router';
+import { getUserProfile, signOut } from '../auth-session';
 
 @Component({
   selector: 'app-main-toolbar',
@@ -18,7 +19,10 @@ export class MainToolbarComponent implements OnInit {
   displayEmail: string = '';
   userInitials: string = 'U';
 
-  constructor(private _softwareMetadataService: SoftwareMetadataService) {}
+  constructor(
+    private _softwareMetadataService: SoftwareMetadataService,
+    private _router: Router,
+  ) {}
   ngOnInit(): void {
     this._softwareMetadataService.softwareVersion$.subscribe(
       (softwareVersion) => {
@@ -26,10 +30,9 @@ export class MainToolbarComponent implements OnInit {
       },
     );
 
-    const token = (keycloak.tokenParsed ?? {}) as Record<string, string>;
-    this.displayName =
-      token['name'] ?? token['preferred_username'] ?? token['given_name'] ?? 'Account';
-    this.displayEmail = token['email'] ?? '';
+    const userProfile = getUserProfile();
+    this.displayName = userProfile.name;
+    this.displayEmail = userProfile.email;
 
     const initialsSource = this.displayName.trim();
     this.userInitials = initialsSource
@@ -41,6 +44,7 @@ export class MainToolbarComponent implements OnInit {
   }
 
   onUserAccountClicked() {
-    keycloak.logout();
+    signOut();
+    void this._router.navigateByUrl('/login');
   }
 }

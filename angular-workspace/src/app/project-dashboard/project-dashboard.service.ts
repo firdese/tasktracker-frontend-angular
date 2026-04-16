@@ -4,12 +4,13 @@ import { TaskGroup } from '../../model/task-group.types';
 import { HttpClient } from '@angular/common/http';
 import { ToastrService } from 'ngx-toastr';
 import { catchError, tap } from 'rxjs/operators';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ProjectDashboardService {
-  private baseTaskGroupUrl: string = 'http://localhost:5000/taskgroup';
+  private readonly baseTaskGroupUrl = `${environment.api.baseUrl}/taskgroup`;
   constructor(
     private _httpClient: HttpClient,
     private _toastrService: ToastrService,

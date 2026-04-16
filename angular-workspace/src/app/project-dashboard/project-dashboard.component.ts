@@ -7,7 +7,7 @@ import { TaskGroup } from '../../model/task-group.types';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatListModule } from '@angular/material/list';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
-import { keycloak } from '../keycloak-init';
+import { hasAccessToken } from '../auth-session';
 @Component({
   selector: 'app-project-dashboard',
   imports: [
@@ -34,7 +34,7 @@ export class ProjectDashboardComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    if (keycloak.authenticated) {
+    if (hasAccessToken()) {
       this._projectDashboardService.loadTaskGroups();
     }
 

@@ -3,6 +3,7 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { Task } from '../model/task.types';
 import { HttpClient } from '@angular/common/http';
 import { ToastrService } from 'ngx-toastr';
+import { environment } from '../environments/environment';
 
 type UpdateTaskSource = 'toggle' | 'detail' | 'generic';
 
@@ -10,7 +11,7 @@ type UpdateTaskSource = 'toggle' | 'detail' | 'generic';
   providedIn: 'root',
 })
 export class TaskService {
-  private baseTaskURL: string = 'http://localhost:5000/tasks';
+  private readonly baseTaskURL = `${environment.api.baseUrl}/tasks`;
   private _currentTaskGroupId: number | null = null;
   constructor(
     private _httpClient: HttpClient,

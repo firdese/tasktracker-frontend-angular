@@ -1,19 +1,14 @@
 import { bootstrapApplication } from '@angular/platform-browser';
 import { appConfig } from './app/app.config';
 import { AppComponent } from './app/app.component';
-import { initializeKeycloak, keycloak } from './app/keycloak-init';
+import { initializeAuth } from './app/auth-session';
 
-initializeKeycloak()
-  .then((authenticated) => {
-    if (!authenticated) {
-      void keycloak.login();
-      return;
-    }
-
+initializeAuth()
+  .then(() => {
     bootstrapApplication(AppComponent, appConfig).catch((err) =>
       console.error(err),
     );
   })
   .catch((err) => {
-    console.error('Keycloak init failed', err);
+    console.error('Auth init failed', err);
   });
