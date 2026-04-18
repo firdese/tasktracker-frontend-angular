@@ -5,6 +5,7 @@
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
+    "build:vercel": "npm run build && node scripts/prepare-vercel.mjs",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "serve:ssr:angular-workspace": "node dist/angular-workspace/server/server.mjs"

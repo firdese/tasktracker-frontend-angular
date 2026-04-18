@@ -3,7 +3,6 @@ import { SingleTaskComponent } from '../single-task/single-task.component';
 import { NgFor, NgIf } from '@angular/common';
 import { TaskService } from '../task.service';
 import { Task } from '../../model/task.types';
-import { AsyncPipe } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import {
@@ -48,7 +47,6 @@ type SortMode = 'display' | 'due' | 'priority' | 'updated';
     SingleTaskComponent,
     NgFor,
     NgIf,
-    AsyncPipe,
     MatIconModule,
     MatButtonModule,
     RouterOutlet,
