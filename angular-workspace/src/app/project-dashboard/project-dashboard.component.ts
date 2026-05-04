@@ -6,6 +6,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { TaskGroup } from '../../model/task-group.types';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatListModule } from '@angular/material/list';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { hasAccessToken } from '../auth-session';
 @Component({
@@ -16,6 +17,7 @@ import { hasAccessToken } from '../auth-session';
     MatIconModule,
     MatSidenavModule,
     MatListModule,
+    MatProgressSpinnerModule,
     RouterOutlet,
     RouterLink,
     RouterLinkActive,
@@ -25,6 +27,7 @@ import { hasAccessToken } from '../auth-session';
 })
 export class ProjectDashboardComponent implements OnInit, OnDestroy {
   taskGroups: TaskGroup[] | null = null;
+  isLoadingTaskGroups = false;
   sidebarOpened: boolean = true;
   editingProjectId: number | null = null;
   editingProjectDescription: string = '';
@@ -40,6 +43,10 @@ export class ProjectDashboardComponent implements OnInit, OnDestroy {
 
     this._projectDashboardService.taskGroups$.subscribe((taskGroups) => {
       this.taskGroups = taskGroups;
+    });
+
+    this._projectDashboardService.isLoadingTaskGroups$.subscribe((isLoading) => {
+      this.isLoadingTaskGroups = isLoading;
     });
   }
 

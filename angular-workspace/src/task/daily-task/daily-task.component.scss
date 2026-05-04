@@ -232,6 +232,40 @@
   gap: 0.65rem;
 }
 
+.task-loading {
+  display: flex;
+  min-height: 12rem;
+  align-items: center;
+  justify-content: center;
+  gap: 0.85rem;
+  border: 1px dashed rgba(56, 189, 248, 0.28);
+  border-radius: 0.8rem;
+  background: rgba(15, 23, 42, 0.45);
+}
+
+.task-loading-copy {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+
+.task-loading-title {
+  margin: 0;
+  color: #e2e8f0;
+  font-weight: 700;
+}
+
+.task-loading-subtitle {
+  margin: 0.25rem 0 0;
+  color: #94a3b8;
+  font-size: 0.82rem;
+}
+
+:host ::ng-deep .task-loading .mat-mdc-progress-spinner {
+  flex: 0 0 auto;
+  --mdc-circular-progress-active-indicator-color: #38bdf8;
+}
+
 .timeline-wrap {
   display: flex;
   flex-direction: column;

@@ -4,6 +4,7 @@ import { Task } from '../model/task.types';
 import { HttpClient } from '@angular/common/http';
 import { ToastrService } from 'ngx-toastr';
 import { environment } from '../environments/environment';
+import { LoadingState } from '../app/loading-state';
 
 type UpdateTaskSource = 'toggle' | 'detail' | 'generic';
 
@@ -12,6 +13,7 @@ type UpdateTaskSource = 'toggle' | 'detail' | 'generic';
 })
 export class TaskService {
   private readonly baseTaskURL = `${environment.api.baseUrl}/tasks`;
+  private readonly _taskListLoadingState = new LoadingState();
   private _currentTaskGroupId: number | null = null;
   constructor(
     private _httpClient: HttpClient,
@@ -20,17 +22,21 @@ export class TaskService {
 
   loadTaskByTaskGroupId(taskGroupId: number) {
     this._currentTaskGroupId = taskGroupId;
-    this._httpClient.get<Task[]>(this.baseTaskURL, {
-      params: { taskGroupId: taskGroupId.toString() },
-    }).subscribe(
-      (tasks) => {
-        this._dailyTask.next(tasks);
-      },
-      (error) => {
-        console.log(error);
-        this._dailyTask.next([]);
-      },
-    );
+    this._dailyTask.next(undefined);
+    this._httpClient
+      .get<Task[]>(this.baseTaskURL, {
+        params: { taskGroupId: taskGroupId.toString() },
+      })
+      .pipe(this._taskListLoadingState.track())
+      .subscribe(
+        (tasks) => {
+          this._dailyTask.next(tasks);
+        },
+        (error) => {
+          console.log(error);
+          this._dailyTask.next([]);
+        },
+      );
   }
 
   loadTaskDetailByTaskId(taskId: number) {
@@ -111,6 +117,10 @@ export class TaskService {
     return this._dailyTask.asObservable();
   }
 
+  get isLoadingTasks$(): Observable<boolean> {
+    return this._taskListLoadingState.isLoading$;
+  }
+
   get animation$(): Observable<string> {
     return this.animation.asObservable();
   }
@@ -121,14 +131,19 @@ export class TaskService {
 
   loadDailyTask(taskGroupId: number) {
     this._currentTaskGroupId = taskGroupId;
-    this._httpClient.get<Task[]>(this.baseTaskURL, {
-      params: { taskGroupId: taskGroupId.toString() },
-    }).subscribe(
-      (tasks) => this._dailyTask.next(tasks),
-      (error) => {
-        console.log(error);
-      },
-    );
+    this._dailyTask.next(undefined);
+    this._httpClient
+      .get<Task[]>(this.baseTaskURL, {
+        params: { taskGroupId: taskGroupId.toString() },
+      })
+      .pipe(this._taskListLoadingState.track())
+      .subscribe(
+        (tasks) => this._dailyTask.next(tasks),
+        (error) => {
+          console.log(error);
+          this._dailyTask.next([]);
+        },
+      );
   }
 
   updateTask(task: Task | undefined, source: UpdateTaskSource = 'generic') {

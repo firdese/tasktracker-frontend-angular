@@ -155,12 +155,22 @@
     </div>
 
     <div class="task-list-wrap">
-      <ng-container *ngIf="selectedView === DashboardView.List; else nonDailyView">
-        <div *ngIf="sortedDailyTasks.length; else emptyState" class="task-list">
-          <div *ngFor="let task of sortedDailyTasks">
-            <app-single-task [task]="task" />
-          </div>
+      <div *ngIf="isLoadingTasks" class="task-loading" aria-live="polite" aria-label="Loading tasks">
+        <mat-progress-spinner diameter="36" mode="indeterminate"></mat-progress-spinner>
+        <div class="task-loading-copy">
+          <p class="task-loading-title">Loading tasks</p>
+          <p class="task-loading-subtitle">Retrieving this project&apos;s task list</p>
         </div>
+      </div>
+
+      <ng-container *ngIf="!isLoadingTasks">
+        <ng-container *ngIf="selectedView === DashboardView.List; else nonDailyView">
+          <div *ngIf="sortedDailyTasks.length; else emptyState" class="task-list">
+            <div *ngFor="let task of sortedDailyTasks">
+              <app-single-task [task]="task" />
+            </div>
+          </div>
+        </ng-container>
       </ng-container>
 
       <ng-template #nonDailyView>

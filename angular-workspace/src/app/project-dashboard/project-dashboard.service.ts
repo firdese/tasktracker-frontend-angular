@@ -5,12 +5,14 @@ import { HttpClient } from '@angular/common/http';
 import { ToastrService } from 'ngx-toastr';
 import { catchError, tap } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
+import { LoadingState } from '../loading-state';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ProjectDashboardService {
   private readonly baseTaskGroupUrl = `${environment.api.baseUrl}/taskgroup`;
+  private readonly _taskGroupLoadingState = new LoadingState();
   constructor(
     private _httpClient: HttpClient,
     private _toastrService: ToastrService,
@@ -24,15 +26,22 @@ export class ProjectDashboardService {
     return this.taskGroups.asObservable();
   }
 
+  get isLoadingTaskGroups$(): Observable<boolean> {
+    return this._taskGroupLoadingState.isLoading$;
+  }
+
   loadTaskGroups() {
-    this._httpClient.get<TaskGroup[]>(this.baseTaskGroupUrl).subscribe({
-      next: (taskGroups) => {
-        this.taskGroups.next(taskGroups);
-      },
-      error: (error) => {
-        console.error('Failed to load projects', error);
-      },
-    });
+    this._httpClient
+      .get<TaskGroup[]>(this.baseTaskGroupUrl)
+      .pipe(this._taskGroupLoadingState.track())
+      .subscribe({
+        next: (taskGroups) => {
+          this.taskGroups.next(taskGroups);
+        },
+        error: (error) => {
+          console.error('Failed to load projects', error);
+        },
+      });
   }
 
   addTaskGroup(): Observable<TaskGroup[]> {

@@ -14,6 +14,7 @@ import {
 import { ProjectDashboardService } from '../../app/project-dashboard/project-dashboard.service';
 import { TaskGroup } from '../../model/task-group.types';
 import { DashboardView } from '../../model/dashboard-view.enum';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 interface TimelineGroup {
   key: string;
@@ -49,6 +50,7 @@ type SortMode = 'display' | 'due' | 'priority' | 'updated';
     NgIf,
     MatIconModule,
     MatButtonModule,
+    MatProgressSpinnerModule,
     RouterOutlet,
     RouterLink,
   ],
@@ -58,6 +60,7 @@ type SortMode = 'display' | 'due' | 'priority' | 'updated';
 export class DailyTaskComponent implements OnInit {
   private static readonly DAY_MS = 24 * 60 * 60 * 1000;
   dailyTasks: Task[] | undefined = undefined;
+  isLoadingTasks = false;
   groupTaskId: number = 0;
   isTaskDetailActive: boolean = false;
   activeTaskGroup: TaskGroup | null = null;
@@ -139,6 +142,10 @@ export class DailyTaskComponent implements OnInit {
     this._taskService.dailyTask$.subscribe((dailyTasks) => {
       this.dailyTasks = dailyTasks;
       this.rebuildGanttChart();
+    });
+
+    this._taskService.isLoadingTasks$.subscribe((isLoading) => {
+      this.isLoadingTasks = isLoading;
     });
 
     this._projectDashboardService.taskGroups$.subscribe((taskGroups) => {

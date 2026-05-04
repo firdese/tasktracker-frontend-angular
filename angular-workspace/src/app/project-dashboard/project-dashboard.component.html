@@ -17,7 +17,15 @@
     </div>
 
     <div class="flex-1 min-h-0 overflow-y-auto">
-      <mat-nav-list class="project-list">
+      <div *ngIf="isLoadingTaskGroups" class="project-loading" aria-live="polite" aria-label="Loading projects">
+        <mat-progress-spinner diameter="28" mode="indeterminate"></mat-progress-spinner>
+        <div class="project-loading-copy">
+          <span class="project-loading-title">Loading projects</span>
+          <span class="project-loading-subtitle">Fetching your task groups</span>
+        </div>
+      </div>
+
+      <mat-nav-list *ngIf="!isLoadingTaskGroups" class="project-list">
         <a
           mat-list-item
           class="project-list-item"

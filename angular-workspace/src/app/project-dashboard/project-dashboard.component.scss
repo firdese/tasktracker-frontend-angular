@@ -92,6 +92,41 @@
   padding-top: 0.25rem;
 }
 
+.project-loading {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 0.35rem;
+  padding: 0.75rem 0.6rem;
+  border: 1px solid rgba(56, 189, 248, 0.18);
+  border-radius: 0.5rem;
+  background: rgba(15, 23, 42, 0.42);
+}
+
+.project-loading-copy {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  line-height: 1.2;
+}
+
+.project-loading-title {
+  color: #e2e8f0;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.project-loading-subtitle {
+  margin-top: 0.15rem;
+  color: #94a3b8;
+  font-size: 0.75rem;
+}
+
+:host ::ng-deep .project-loading .mat-mdc-progress-spinner {
+  flex: 0 0 auto;
+  --mdc-circular-progress-active-indicator-color: #38bdf8;
+}
+
 .project-list-item {
   --mdc-list-list-item-one-line-container-height: 3rem;
   display: flex;
