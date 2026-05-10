@@ -10,7 +10,13 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { ToastrService } from 'ngx-toastr';
 import { environment } from '../../environments/environment';
-import { hasAccessToken, signInWithPassword } from '../auth-session';
+import {
+  getAuthProviderLabel,
+  hasAccessToken,
+  isPasswordSignInAvailable,
+  signInWithPassword,
+  signInWithProvider,
+} from '../auth-session';
 
 @Component({
   selector: 'app-login',
@@ -32,6 +38,8 @@ export class LoginComponent {
   password = '';
   isSubmitting = false;
   hasAnonKey = !!environment.auth.anonKey?.trim();
+  authProviderLabel = getAuthProviderLabel();
+  isPasswordSignInAvailable = isPasswordSignInAvailable();
 
   constructor(
     private readonly _router: Router,
@@ -48,6 +56,11 @@ export class LoginComponent {
       return;
     }
 
+    if (!this.isPasswordSignInAvailable) {
+      await this.onProviderSignIn();
+      return;
+    }
+
     if (!this.email.trim() || !this.password) {
       this._toastrService.error('Email and password are required');
       return;
@@ -57,14 +70,38 @@ export class LoginComponent {
 
     try {
       await signInWithPassword(this.email.trim(), this.password);
-      const returnUrl = this._route.snapshot.queryParamMap.get('returnUrl') || '/';
+      const returnUrl =
+        this._route.snapshot.queryParamMap.get('returnUrl') || '/';
       await this._router.navigateByUrl(returnUrl);
       this._toastrService.success('Signed in');
     } catch (error) {
       const message =
-        error instanceof Error ? error.message : 'Could not sign in with Supabase';
+        error instanceof Error
+          ? error.message
+          : 'Could not sign in with Supabase';
       this._toastrService.error(message);
     } finally {
+      this.isSubmitting = false;
+    }
+  }
+
+  async onProviderSignIn(): Promise<void> {
+    if (this.isSubmitting) {
+      return;
+    }
+
+    this.isSubmitting = true;
+
+    try {
+      const returnUrl =
+        this._route.snapshot.queryParamMap.get('returnUrl') || '/';
+      await signInWithProvider(returnUrl);
+    } catch (error) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : `Could not sign in with ${this.authProviderLabel}`;
+      this._toastrService.error(message);
       this.isSubmitting = false;
     }
   }

@@ -36,7 +36,9 @@ yarn-error.log
 /libpeerconnection.log
 testem.log
 /typings
+src/environments/environment.development.ts
 src/environments/environment.local.ts
+src/environments/environment.local.keycloak.ts
 src/environments/environment.generated.production.ts
 
 # System files
