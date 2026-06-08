@@ -182,10 +182,15 @@
 
 .edit-btn,
 .delete-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   flex-shrink: 0;
   width: 2rem;
   height: 2rem;
+  padding: 0;
   border-radius: 999px;
+  line-height: 1;
   opacity: 0;
   transform: scale(0.92);
   pointer-events: none;
@@ -217,6 +222,10 @@
 
 .delete-btn {
   color: #ef4444;
+}
+
+.delete-btn mat-icon {
+  margin: 0;
 }
 
 .project-list-item:hover .edit-btn,
