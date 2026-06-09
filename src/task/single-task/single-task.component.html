@@ -5,28 +5,74 @@
     [checked]="!!task?.taskCompletedAtUtc"
   ></mat-checkbox>
 
-  <a class="task-main" [routerLink]="[task?.taskId]" queryParamsHandling="preserve">
-    <span class="task-kicker">Task #{{ task?.taskId }}</span>
-    <span class="task-title">{{ task?.taskDescription || "Untitled task" }}</span>
-    <span
-      *ngIf="task?.taskPriority !== null && task?.taskPriority !== undefined"
-      class="task-priority"
-      [class.p1]="task?.taskPriority === 1"
-      [class.p2]="task?.taskPriority === 2"
-      [class.p3]="task?.taskPriority === 3"
-      [class.p4]="task?.taskPriority === 4"
-      [class.p5]="task?.taskPriority === 5"
+  <div class="task-main">
+    <a
+      class="task-kicker"
+      [routerLink]="[task?.taskId]"
+      queryParamsHandling="preserve"
+      >Task #{{ task?.taskId }}</a
     >
-      P{{ task?.taskPriority }}
-    </span>
-  </a>
+    <input
+      class="task-description-input"
+      type="text"
+      [value]="descriptionDraft"
+      (input)="descriptionDraft = $any($event.target).value"
+      (blur)="saveTaskDescription()"
+      (keydown.enter)="saveTaskDescription($event)"
+      (keydown.escape)="resetTaskDescription($event)"
+      placeholder="Untitled task"
+      aria-label="Task description"
+    />
+    <div class="task-priority-control" aria-label="Task priority">
+      <span>Priority</span>
+      <div class="priority-options">
+        <button
+          type="button"
+          class="priority-option none"
+          [class.is-active]="priorityDraft === null"
+          (click)="updateTaskPriority(null)"
+        >
+          None
+        </button>
+        <button
+          *ngFor="let option of priorityOptions"
+          type="button"
+          class="priority-option"
+          [class.is-active]="priorityDraft === option.value"
+          [class.p1]="option.value === 1"
+          [class.p2]="option.value === 2"
+          [class.p3]="option.value === 3"
+          [class.p4]="option.value === 4"
+          [class.p5]="option.value === 5"
+          (click)="updateTaskPriority(option.value)"
+        >
+          P{{ option.value }}
+        </button>
+      </div>
+    </div>
+  </div>
 
   <div class="task-actions">
     <span class="task-state" [class.done]="!!task?.taskCompletedAtUtc">
       {{ task?.taskCompletedAtUtc ? "Done" : "In progress" }}
     </span>
 
-    <button class="task-delete" (click)="deleteTask()" mat-icon-button aria-label="Delete task">
+    <a
+      class="task-open"
+      [routerLink]="[task?.taskId]"
+      queryParamsHandling="preserve"
+      aria-label="Open task details"
+    >
+      <mat-icon fontIcon="open_in_new"></mat-icon>
+      <span>Details</span>
+    </a>
+
+    <button
+      class="task-delete"
+      (click)="deleteTask()"
+      mat-icon-button
+      aria-label="Delete task"
+    >
       <mat-icon fontIcon="delete"></mat-icon>
     </button>
   </div>

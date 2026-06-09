@@ -3,7 +3,20 @@
     <div class="task-panel-head">
       <div>
         <div class="task-panel-title-row">
-          <h2 class="task-panel-title">Task List</h2>
+          <ng-container *ngIf="!editingProjectDescription; else projectDescriptionEditInput">
+            <h2 class="task-panel-project-name">{{ activeTaskGroup?.taskGroupDescription || 'Project' }}</h2>
+          </ng-container>
+          <ng-template #projectDescriptionEditInput>
+            <input
+              class="project-description-input"
+              [value]="projectDescriptionDraft"
+              (input)="projectDescriptionDraft = $any($event.target).value"
+              (keydown.enter)="saveProjectDescription($event)"
+              (keydown.escape)="cancelProjectDescriptionEdit($event)"
+              aria-label="Project description"
+            />
+          </ng-template>
+
           <ng-container *ngIf="!editingProjectDescription; else editProjectDescriptionTemplate">
             <button
               mat-icon-button
@@ -34,20 +47,6 @@
           </ng-template>
         </div>
 
-        <ng-container *ngIf="!editingProjectDescription; else projectDescriptionEditInput">
-          <p class="task-panel-project-name">{{ activeTaskGroup?.taskGroupDescription || 'Project' }}</p>
-        </ng-container>
-        <ng-template #projectDescriptionEditInput>
-          <input
-            class="project-description-input"
-            [value]="projectDescriptionDraft"
-            (input)="projectDescriptionDraft = $any($event.target).value"
-            (keydown.enter)="saveProjectDescription($event)"
-            (keydown.escape)="cancelProjectDescriptionEdit($event)"
-            aria-label="Project description"
-          />
-        </ng-template>
-
         <p class="task-panel-subtitle">
           {{ sortedDailyTasks.length }} task{{ sortedDailyTasks.length === 1 ? '' : 's' }}
           <span *ngIf="selectedFocusMode !== 'all'">
@@ -60,6 +59,10 @@
         <mat-icon fontIcon="add"></mat-icon>
         <span class="ml-1">New Task</span>
       </button>
+    </div>
+
+    <div class="task-list-section-head">
+      <h3 class="task-list-title">Task List</h3>
     </div>
 
     <div class="task-view-switch">
