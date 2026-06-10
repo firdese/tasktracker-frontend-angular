@@ -13,6 +13,9 @@ import { MatOptionModule } from '@angular/material/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { combineLatest } from 'rxjs';
+import { ToastrService } from 'ngx-toastr';
+import { StorageService } from '../storage.service';
+import { TaskAttachment } from '../../model/storage.types';
 
 type NullableTaskDateKey =
   | 'taskStartAtUtc'
@@ -43,6 +46,8 @@ export class TaskDetailComponent implements OnInit {
   taskDetail: Task | undefined;
   private _currentTaskId: number | null = null;
   dependencyTaskIdsInput: string = '';
+  attachments: TaskAttachment[] = [];
+  isUploadingAttachment = false;
   readonly localTimeZone: string =
     Intl.DateTimeFormat().resolvedOptions().timeZone || 'Local time';
   readonly metadataDateFormat: string = 'MMM d, y, h:mm:ss a z';
@@ -66,6 +71,8 @@ export class TaskDetailComponent implements OnInit {
     private _activatedRoute: ActivatedRoute,
     private _router: Router,
     private _changeDetectorRef: ChangeDetectorRef,
+    private _storageService: StorageService,
+    private _toastrService: ToastrService,
   ) {}
 
   ngOnInit(): void {
@@ -75,41 +82,43 @@ export class TaskDetailComponent implements OnInit {
         const parsedTaskId = Number.parseInt(taskId, 10);
         if (!Number.isNaN(parsedTaskId) && parsedTaskId > 0) {
           this._currentTaskId = parsedTaskId;
+          this.attachments = [];
           this._taskService.loadTaskDetailByTaskId(parsedTaskId);
+          this.loadAttachments(parsedTaskId);
           return;
         }
       }
 
       this._currentTaskId = null;
+      this.attachments = [];
       this._taskService.updateTaskDetail(undefined);
       this.backToList();
     });
 
-    combineLatest([this._taskService.taskDetail$, this._taskService.dailyTask$]).subscribe(
-      ([taskDetail, dailyTasks]) => {
-        if (
-          this._currentTaskId &&
-          dailyTasks !== undefined &&
-          !taskDetail
-        ) {
-          this.backToList();
-          return;
-        }
+    combineLatest([
+      this._taskService.taskDetail$,
+      this._taskService.dailyTask$,
+    ]).subscribe(([taskDetail, dailyTasks]) => {
+      if (this._currentTaskId && dailyTasks !== undefined && !taskDetail) {
+        this.backToList();
+        return;
+      }
 
-        this.taskDetail = structuredClone(taskDetail);
-        this.dependencyTaskIdsInput = (
-          this.taskDetail?.taskDependencyTaskIds ?? []
-        ).join(', ');
-        this.dateInputValues = {
-          taskStartAtUtc: this.toDateObject(this.taskDetail?.taskStartAtUtc),
-          taskEndAtUtc: this.toDateObject(this.taskDetail?.taskEndAtUtc),
-          taskDueAtUtc: this.toDateObject(this.taskDetail?.taskDueAtUtc),
-          taskCompletedAtUtc: this.toDateObject(this.taskDetail?.taskCompletedAtUtc),
-          taskDeletedAtUtc: this.toDateObject(this.taskDetail?.taskDeletedAtUtc),
-        };
-        this._changeDetectorRef.markForCheck();
-      },
-    );
+      this.taskDetail = structuredClone(taskDetail);
+      this.dependencyTaskIdsInput = (
+        this.taskDetail?.taskDependencyTaskIds ?? []
+      ).join(', ');
+      this.dateInputValues = {
+        taskStartAtUtc: this.toDateObject(this.taskDetail?.taskStartAtUtc),
+        taskEndAtUtc: this.toDateObject(this.taskDetail?.taskEndAtUtc),
+        taskDueAtUtc: this.toDateObject(this.taskDetail?.taskDueAtUtc),
+        taskCompletedAtUtc: this.toDateObject(
+          this.taskDetail?.taskCompletedAtUtc,
+        ),
+        taskDeletedAtUtc: this.toDateObject(this.taskDetail?.taskDeletedAtUtc),
+      };
+      this._changeDetectorRef.markForCheck();
+    });
   }
 
   onOptionalNumberChanged(
@@ -173,6 +182,80 @@ export class TaskDetailComponent implements OnInit {
 
   onSaveDetail() {
     this._taskService.updateTask(this.taskDetail, 'detail');
+  }
+
+  onAttachmentSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    input.value = '';
+
+    if (!file || !this.taskDetail?.taskId || this.isUploadingAttachment) {
+      return;
+    }
+
+    this.isUploadingAttachment = true;
+    this._storageService.uploadTaskAttachment(this.taskDetail.taskId, file).subscribe({
+      next: (attachment) => {
+        this.attachments = [attachment, ...this.attachments];
+        this.isUploadingAttachment = false;
+        this._toastrService.success('Attachment uploaded');
+        this._changeDetectorRef.markForCheck();
+      },
+      error: (error) => {
+        console.log(error);
+        this.isUploadingAttachment = false;
+        this._toastrService.error('Could not upload attachment');
+        this._changeDetectorRef.markForCheck();
+      },
+    });
+  }
+
+  openAttachment(attachment: TaskAttachment) {
+    this._storageService.download(attachment.objectKey).subscribe({
+      next: (blob) => {
+        const objectUrl = URL.createObjectURL(blob);
+        window.open(objectUrl, '_blank');
+        window.setTimeout(() => URL.revokeObjectURL(objectUrl), 60_000);
+      },
+      error: (error) => {
+        console.log(error);
+        this._toastrService.error('Could not open attachment');
+      },
+    });
+  }
+
+  deleteAttachment(attachment: TaskAttachment) {
+    if (!this.taskDetail?.taskId) {
+      return;
+    }
+
+    this._storageService
+      .deleteTaskAttachment(this.taskDetail.taskId, attachment.taskAttachmentId)
+      .subscribe({
+      next: () => {
+        this.attachments = this.attachments.filter(
+          (item) => item.taskAttachmentId !== attachment.taskAttachmentId,
+        );
+        this._toastrService.success('Attachment deleted');
+        this._changeDetectorRef.markForCheck();
+      },
+      error: (error) => {
+        console.log(error);
+        this._toastrService.error('Could not delete attachment');
+      },
+    });
+  }
+
+  formatAttachmentSize(sizeBytes: number): string {
+    if (sizeBytes < 1024) {
+      return `${sizeBytes} B`;
+    }
+
+    if (sizeBytes < 1024 * 1024) {
+      return `${(sizeBytes / 1024).toFixed(1)} KB`;
+    }
+
+    return `${(sizeBytes / (1024 * 1024)).toFixed(1)} MB`;
   }
 
   backToList() {
@@ -257,5 +340,24 @@ export class TaskDetailComponent implements OnInit {
     }
 
     return [...new Set(dependencyIds)];
+  }
+
+  private loadAttachments(taskId: number) {
+    this._storageService.listTaskAttachments(taskId).subscribe({
+      next: (attachments) => {
+        if (this._currentTaskId !== taskId) {
+          return;
+        }
+
+        this.attachments = attachments;
+        this._changeDetectorRef.markForCheck();
+      },
+      error: (error) => {
+        console.log(error);
+        this.attachments = [];
+        this._toastrService.error('Could not load attachments');
+        this._changeDetectorRef.markForCheck();
+      },
+    });
   }
 }

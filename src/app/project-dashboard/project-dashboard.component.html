@@ -64,7 +64,7 @@
         </svg>
       </button>
 
-      <div *ngIf="!outlet.isActivated" class="flex flex-col items-center justify-center h-full text-center px-6">
+      <div *ngIf="showWelcomeMessage" class="flex flex-col items-center justify-center h-full text-center px-6">
         <h1 class="text-2xl font-semibold tracking-tight text-slate-100">Welcome to Task Tracker</h1>
         <p class="mt-2 text-sm text-slate-400">Select a project from the sidebar.</p>
       </div>

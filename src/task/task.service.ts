@@ -202,12 +202,18 @@ export class TaskService {
 
     if (taskIndex !== undefined && taskIndex >= 0) {
       const currentTasks = [...(this._dailyTask.value ?? [])];
-      currentTasks.splice(taskIndex, 1, task);
+      currentTasks.splice(taskIndex, 1, {
+        ...currentTasks[taskIndex],
+        ...task,
+      });
       this._dailyTask.next(currentTasks);
     }
 
     if (this._taskDetail.value?.taskId === task.taskId) {
-      this._taskDetail.next(task);
+      this._taskDetail.next({
+        ...this._taskDetail.value,
+        ...task,
+      });
     }
   }
 

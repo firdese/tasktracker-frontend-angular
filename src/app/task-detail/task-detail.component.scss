@@ -191,9 +191,21 @@
   border-color: rgba(148, 163, 184, 0.35) !important;
 }
 
-:host ::ng-deep .detail-field .mdc-text-field--focused .mdc-notched-outline__leading,
-:host ::ng-deep .detail-field .mdc-text-field--focused .mdc-notched-outline__notch,
-:host ::ng-deep .detail-field .mdc-text-field--focused .mdc-notched-outline__trailing {
+:host
+  ::ng-deep
+  .detail-field
+  .mdc-text-field--focused
+  .mdc-notched-outline__leading,
+:host
+  ::ng-deep
+  .detail-field
+  .mdc-text-field--focused
+  .mdc-notched-outline__notch,
+:host
+  ::ng-deep
+  .detail-field
+  .mdc-text-field--focused
+  .mdc-notched-outline__trailing {
   border-color: rgba(56, 189, 248, 0.65) !important;
 }
 
@@ -260,6 +272,108 @@
   color: #cbd5e1;
 }
 
+.attachment-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.attachment-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.attachment-header .detail-section-title {
+  margin-bottom: 0;
+}
+
+.attachment-input {
+  display: none;
+}
+
+.attachment-upload-btn {
+  flex: 0 0 auto;
+  min-height: 2rem !important;
+  border-color: rgba(56, 189, 248, 0.42) !important;
+  color: #e0f2fe !important;
+}
+
+.attachment-upload-btn mat-icon {
+  margin-right: 0.25rem;
+}
+
+.attachment-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.attachment-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  min-height: 3rem;
+  padding: 0.55rem 0.65rem;
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  border-radius: 0.65rem;
+  background: rgba(15, 23, 42, 0.55);
+}
+
+.attachment-summary {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  min-width: 0;
+}
+
+.attachment-summary mat-icon {
+  flex: 0 0 auto;
+  color: #7dd3fc;
+}
+
+.attachment-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 0.12rem;
+  min-width: 0;
+}
+
+.attachment-name {
+  overflow: hidden;
+  color: #e2e8f0;
+  font-size: 0.82rem;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.attachment-meta {
+  overflow: hidden;
+  color: #94a3b8;
+  font-size: 0.68rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.attachment-actions {
+  display: flex;
+  align-items: center;
+  flex: 0 0 auto;
+}
+
+.attachment-actions button {
+  color: #cbd5e1;
+}
+
+.attachment-empty {
+  margin: 0;
+  color: #94a3b8;
+  font-size: 0.78rem;
+}
+
 .detail-actions button {
   border-radius: 0.65rem;
 }
@@ -284,5 +398,16 @@
 
   .detail-section {
     padding: 0.75rem;
+  }
+
+  .attachment-header,
+  .attachment-row {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .attachment-upload-btn,
+  .attachment-actions {
+    align-self: flex-end;
   }
 }
