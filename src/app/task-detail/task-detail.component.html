@@ -373,6 +373,90 @@
       </button>
     </div>
   </section>
+
+  <section
+    class="attachment-preview-backdrop"
+    *ngIf="previewAttachment"
+    (click)="closeAttachmentPreview()"
+  >
+    <div class="attachment-preview-panel" (click)="$event.stopPropagation()">
+      <header class="attachment-preview-header">
+        <div class="attachment-preview-title">
+          <mat-icon fontIcon="description"></mat-icon>
+          <div>
+            <h4>{{ previewAttachment.fileName }}</h4>
+            <p>
+              {{ previewAttachment.contentType || "application/octet-stream" }}
+              -
+              {{ formatAttachmentSize(previewAttachment.sizeBytes) }}
+            </p>
+          </div>
+        </div>
+        <div class="attachment-preview-actions">
+          <button
+            mat-icon-button
+            type="button"
+            (click)="downloadPreviewAttachment()"
+            [disabled]="isPreviewLoading || !previewObjectUrl"
+            aria-label="Download attachment"
+          >
+            <mat-icon fontIcon="download"></mat-icon>
+          </button>
+          <button
+            mat-icon-button
+            type="button"
+            (click)="closeAttachmentPreview()"
+            aria-label="Close attachment preview"
+          >
+            <mat-icon fontIcon="close"></mat-icon>
+          </button>
+        </div>
+      </header>
+
+      <div class="attachment-preview-body">
+        <div class="attachment-preview-loading" *ngIf="isPreviewLoading">
+          Loading preview...
+        </div>
+
+        <img
+          *ngIf="!isPreviewLoading && previewKind === 'image' && previewObjectUrl"
+          class="attachment-preview-image"
+          [src]="previewObjectUrl"
+          [alt]="previewAttachment.fileName"
+        />
+
+        <iframe
+          *ngIf="!isPreviewLoading && previewKind === 'pdf' && previewSafeUrl"
+          class="attachment-preview-frame"
+          [src]="previewSafeUrl"
+          [title]="previewAttachment.fileName"
+        ></iframe>
+
+        <pre
+          *ngIf="!isPreviewLoading && previewKind === 'text'"
+          class="attachment-preview-text"
+          >{{ previewText }}</pre
+        >
+
+        <div
+          class="attachment-preview-unsupported"
+          *ngIf="!isPreviewLoading && previewKind === 'unsupported'"
+        >
+          <mat-icon fontIcon="insert_drive_file"></mat-icon>
+          <p>Preview is not available for this file type.</p>
+          <button
+            mat-stroked-button
+            type="button"
+            (click)="downloadPreviewAttachment()"
+            [disabled]="!previewObjectUrl"
+          >
+            <mat-icon fontIcon="download"></mat-icon>
+            Download
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
 </ng-container>
 
 <ng-template #emptyDetail>

@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { TaskService } from '../../task/task.service';
 import { Task } from '../../model/task.types';
 import { MatInputModule } from '@angular/material/input';
@@ -12,6 +12,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatOptionModule } from '@angular/material/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { combineLatest } from 'rxjs';
 import { ToastrService } from 'ngx-toastr';
 import { StorageService } from '../storage.service';
@@ -24,6 +25,7 @@ type NullableTaskDateKey =
   | 'taskDueAtUtc'
   | 'taskDeletedAtUtc';
 type EditableTaskDateKey = NullableTaskDateKey;
+type AttachmentPreviewKind = 'image' | 'pdf' | 'text' | 'unsupported';
 
 @Component({
   selector: 'app-task-detail',
@@ -42,12 +44,18 @@ type EditableTaskDateKey = NullableTaskDateKey;
   templateUrl: './task-detail.component.html',
   styleUrl: './task-detail.component.scss',
 })
-export class TaskDetailComponent implements OnInit {
+export class TaskDetailComponent implements OnInit, OnDestroy {
   taskDetail: Task | undefined;
   private _currentTaskId: number | null = null;
   dependencyTaskIdsInput: string = '';
   attachments: TaskAttachment[] = [];
   isUploadingAttachment = false;
+  isPreviewLoading = false;
+  previewAttachment: TaskAttachment | null = null;
+  previewObjectUrl: string | null = null;
+  previewSafeUrl: SafeResourceUrl | null = null;
+  previewText: string | null = null;
+  previewKind: AttachmentPreviewKind = 'unsupported';
   readonly localTimeZone: string =
     Intl.DateTimeFormat().resolvedOptions().timeZone || 'Local time';
   readonly metadataDateFormat: string = 'MMM d, y, h:mm:ss a z';
@@ -73,6 +81,7 @@ export class TaskDetailComponent implements OnInit {
     private _changeDetectorRef: ChangeDetectorRef,
     private _storageService: StorageService,
     private _toastrService: ToastrService,
+    private _domSanitizer: DomSanitizer,
   ) {}
 
   ngOnInit(): void {
@@ -210,18 +219,62 @@ export class TaskDetailComponent implements OnInit {
     });
   }
 
+  ngOnDestroy(): void {
+    this.revokePreviewObjectUrl();
+  }
+
   openAttachment(attachment: TaskAttachment) {
+    this.closeAttachmentPreview();
+    this.previewAttachment = attachment;
+    this.previewKind = this.getAttachmentPreviewKind(attachment);
+    this.isPreviewLoading = true;
+
     this._storageService.download(attachment.objectKey).subscribe({
       next: (blob) => {
         const objectUrl = URL.createObjectURL(blob);
-        window.open(objectUrl, '_blank');
-        window.setTimeout(() => URL.revokeObjectURL(objectUrl), 60_000);
+        this.previewObjectUrl = objectUrl;
+        this.previewSafeUrl =
+          this._domSanitizer.bypassSecurityTrustResourceUrl(objectUrl);
+
+        if (this.previewKind === 'text') {
+          blob.text().then((content) => {
+            this.previewText = content;
+            this.isPreviewLoading = false;
+            this._changeDetectorRef.markForCheck();
+          });
+          return;
+        }
+
+        this.isPreviewLoading = false;
+        this._changeDetectorRef.markForCheck();
       },
       error: (error) => {
         console.log(error);
+        this.closeAttachmentPreview();
         this._toastrService.error('Could not open attachment');
       },
     });
+  }
+
+  closeAttachmentPreview() {
+    this.revokePreviewObjectUrl();
+    this.previewAttachment = null;
+    this.previewSafeUrl = null;
+    this.previewText = null;
+    this.previewKind = 'unsupported';
+    this.isPreviewLoading = false;
+    this._changeDetectorRef.markForCheck();
+  }
+
+  downloadPreviewAttachment() {
+    if (!this.previewAttachment || !this.previewObjectUrl) {
+      return;
+    }
+
+    const link = document.createElement('a');
+    link.href = this.previewObjectUrl;
+    link.download = this.previewAttachment.fileName;
+    link.click();
   }
 
   deleteAttachment(attachment: TaskAttachment) {
@@ -359,5 +412,32 @@ export class TaskDetailComponent implements OnInit {
         this._changeDetectorRef.markForCheck();
       },
     });
+  }
+
+  private getAttachmentPreviewKind(
+    attachment: TaskAttachment,
+  ): AttachmentPreviewKind {
+    const contentType = attachment.contentType.toLowerCase();
+
+    if (contentType.startsWith('image/')) {
+      return 'image';
+    }
+
+    if (contentType === 'application/pdf') {
+      return 'pdf';
+    }
+
+    if (contentType.startsWith('text/')) {
+      return 'text';
+    }
+
+    return 'unsupported';
+  }
+
+  private revokePreviewObjectUrl() {
+    if (this.previewObjectUrl) {
+      URL.revokeObjectURL(this.previewObjectUrl);
+      this.previewObjectUrl = null;
+    }
   }
 }
