@@ -3,11 +3,18 @@
     <header class="detail-header">
       <div class="detail-head-row">
         <p class="detail-kicker">Task Editor</p>
-        <button mat-stroked-button type="button" class="detail-back-btn" (click)="backToList()">
+        <button
+          mat-stroked-button
+          type="button"
+          class="detail-back-btn"
+          (click)="backToList()"
+        >
           Back to List
         </button>
       </div>
-      <h3 class="detail-title">{{ taskDetail.taskDescription || "Untitled task" }}</h3>
+      <h3 class="detail-title">
+        {{ taskDetail.taskDescription || "Untitled task" }}
+      </h3>
     </header>
 
     <section class="detail-section">
@@ -16,7 +23,12 @@
         <div class="field-block">
           <label class="field-caption">Task ID</label>
           <mat-form-field appearance="outline" class="detail-field">
-            <input matInput type="number" [ngModel]="taskDetail.taskId" readonly />
+            <input
+              matInput
+              type="number"
+              [ngModel]="taskDetail.taskId"
+              readonly
+            />
           </mat-form-field>
         </div>
 
@@ -34,22 +46,41 @@
 
         <div class="field-block">
           <label class="field-caption">Priority</label>
-          <mat-form-field appearance="outline" class="detail-field priority-field">
+          <mat-form-field
+            appearance="outline"
+            class="detail-field priority-field"
+          >
             <mat-select
               panelClass="priority-panel"
               [ngModel]="taskDetail.taskPriority"
               (ngModelChange)="onOptionalNumberChanged('taskPriority', $event)"
             >
               <mat-select-trigger>
-                <span class="priority-pill" [class.none]="taskDetail.taskPriority === null || taskDetail.taskPriority === undefined">
+                <span
+                  class="priority-pill"
+                  [class.none]="
+                    taskDetail.taskPriority === null ||
+                    taskDetail.taskPriority === undefined
+                  "
+                >
                   {{ getPriorityLabel(taskDetail.taskPriority) }}
                 </span>
               </mat-select-trigger>
               <mat-option [value]="null">
                 <span class="priority-option none">None</span>
               </mat-option>
-              <mat-option *ngFor="let option of priorityOptions" [value]="option.value">
-                <span class="priority-option" [class.p1]="option.value === 1" [class.p2]="option.value === 2" [class.p3]="option.value === 3" [class.p4]="option.value === 4" [class.p5]="option.value === 5">
+              <mat-option
+                *ngFor="let option of priorityOptions"
+                [value]="option.value"
+              >
+                <span
+                  class="priority-option"
+                  [class.p1]="option.value === 1"
+                  [class.p2]="option.value === 2"
+                  [class.p3]="option.value === 3"
+                  [class.p4]="option.value === 4"
+                  [class.p5]="option.value === 5"
+                >
                   {{ option.label }}
                 </span>
               </mat-option>
@@ -70,7 +101,9 @@
               [ngModel]="taskDetail.taskProgress ?? 0"
               (ngModelChange)="onProgressChanged($event)"
             />
-            <span class="progress-chip">{{ taskDetail.taskProgress ?? 0 }}%</span>
+            <span class="progress-chip"
+              >{{ taskDetail.taskProgress ?? 0 }}%</span
+            >
           </div>
           <p class="field-help">Used by Gantt fill indicator (0 to 100).</p>
         </div>
@@ -91,7 +124,11 @@
         <div class="field-block full-span">
           <label class="field-caption">Description</label>
           <mat-form-field appearance="outline" class="detail-field">
-            <textarea matInput rows="3" [(ngModel)]="taskDetail.taskDescription"></textarea>
+            <textarea
+              matInput
+              rows="3"
+              [(ngModel)]="taskDetail.taskDescription"
+            ></textarea>
           </mat-form-field>
         </div>
       </div>
@@ -99,7 +136,9 @@
 
     <section class="detail-section">
       <h4 class="detail-section-title">Dates</h4>
-      <p class="detail-timezone-note">Displayed in local time: {{ localTimeZone }}. Saved as UTC.</p>
+      <p class="detail-timezone-note">
+        Displayed in local time: {{ localTimeZone }}. Saved as UTC.
+      </p>
       <div class="detail-grid">
         <div class="field-block">
           <label class="field-caption">Start (Local)</label>
@@ -110,13 +149,24 @@
               [ngModel]="dateInputValues.taskStartAtUtc"
               (dateChange)="onDateChanged('taskStartAtUtc', $event.value)"
             />
-            <mat-datepicker-toggle matIconSuffix [for]="startAtPicker"></mat-datepicker-toggle>
+            <mat-datepicker-toggle
+              matIconSuffix
+              [for]="startAtPicker"
+            ></mat-datepicker-toggle>
             <mat-datepicker #startAtPicker></mat-datepicker>
-            <button mat-icon-button matSuffix type="button" (click)="clearNullableDate('taskStartAtUtc')" aria-label="Clear start date">
+            <button
+              mat-icon-button
+              matSuffix
+              type="button"
+              (click)="clearNullableDate('taskStartAtUtc')"
+              aria-label="Clear start date"
+            >
               <mat-icon fontIcon="close"></mat-icon>
             </button>
           </mat-form-field>
-          <p class="field-help">Planned start date for timeline and Gantt range.</p>
+          <p class="field-help">
+            Planned start date for timeline and Gantt range.
+          </p>
         </div>
 
         <div class="field-block">
@@ -128,13 +178,24 @@
               [ngModel]="dateInputValues.taskEndAtUtc"
               (dateChange)="onDateChanged('taskEndAtUtc', $event.value)"
             />
-            <mat-datepicker-toggle matIconSuffix [for]="endAtPicker"></mat-datepicker-toggle>
+            <mat-datepicker-toggle
+              matIconSuffix
+              [for]="endAtPicker"
+            ></mat-datepicker-toggle>
             <mat-datepicker #endAtPicker></mat-datepicker>
-            <button mat-icon-button matSuffix type="button" (click)="clearNullableDate('taskEndAtUtc')" aria-label="Clear end date">
+            <button
+              mat-icon-button
+              matSuffix
+              type="button"
+              (click)="clearNullableDate('taskEndAtUtc')"
+              aria-label="Clear end date"
+            >
               <mat-icon fontIcon="close"></mat-icon>
             </button>
           </mat-form-field>
-          <p class="field-help">Planned finish date used for Gantt bar length.</p>
+          <p class="field-help">
+            Planned finish date used for Gantt bar length.
+          </p>
         </div>
 
         <div class="field-block">
@@ -146,13 +207,24 @@
               [ngModel]="dateInputValues.taskDueAtUtc"
               (dateChange)="onDateChanged('taskDueAtUtc', $event.value)"
             />
-            <mat-datepicker-toggle matIconSuffix [for]="dueAtPicker"></mat-datepicker-toggle>
+            <mat-datepicker-toggle
+              matIconSuffix
+              [for]="dueAtPicker"
+            ></mat-datepicker-toggle>
             <mat-datepicker #dueAtPicker></mat-datepicker>
-            <button mat-icon-button matSuffix type="button" (click)="clearNullableDate('taskDueAtUtc')" aria-label="Clear due date">
+            <button
+              mat-icon-button
+              matSuffix
+              type="button"
+              (click)="clearNullableDate('taskDueAtUtc')"
+              aria-label="Clear due date"
+            >
               <mat-icon fontIcon="close"></mat-icon>
             </button>
           </mat-form-field>
-          <p class="field-help">Deadline/commitment date. Can differ from planned End.</p>
+          <p class="field-help">
+            Deadline/commitment date. Can differ from planned End.
+          </p>
         </div>
 
         <div class="field-block">
@@ -164,13 +236,24 @@
               [ngModel]="dateInputValues.taskCompletedAtUtc"
               (dateChange)="onDateChanged('taskCompletedAtUtc', $event.value)"
             />
-            <mat-datepicker-toggle matIconSuffix [for]="completedAtPicker"></mat-datepicker-toggle>
+            <mat-datepicker-toggle
+              matIconSuffix
+              [for]="completedAtPicker"
+            ></mat-datepicker-toggle>
             <mat-datepicker #completedAtPicker></mat-datepicker>
-            <button mat-icon-button matSuffix type="button" (click)="clearNullableDate('taskCompletedAtUtc')" aria-label="Clear completed date">
+            <button
+              mat-icon-button
+              matSuffix
+              type="button"
+              (click)="clearNullableDate('taskCompletedAtUtc')"
+              aria-label="Clear completed date"
+            >
               <mat-icon fontIcon="close"></mat-icon>
             </button>
           </mat-form-field>
-          <p class="field-help">Actual completion timestamp (toggles done status).</p>
+          <p class="field-help">
+            Actual completion timestamp (toggles done status).
+          </p>
         </div>
 
         <div class="field-block">
@@ -182,9 +265,18 @@
               [ngModel]="dateInputValues.taskDeletedAtUtc"
               (dateChange)="onDateChanged('taskDeletedAtUtc', $event.value)"
             />
-            <mat-datepicker-toggle matIconSuffix [for]="deletedAtPicker"></mat-datepicker-toggle>
+            <mat-datepicker-toggle
+              matIconSuffix
+              [for]="deletedAtPicker"
+            ></mat-datepicker-toggle>
             <mat-datepicker #deletedAtPicker></mat-datepicker>
-            <button mat-icon-button matSuffix type="button" (click)="clearNullableDate('taskDeletedAtUtc')" aria-label="Clear deleted date">
+            <button
+              mat-icon-button
+              matSuffix
+              type="button"
+              (click)="clearNullableDate('taskDeletedAtUtc')"
+              aria-label="Clear deleted date"
+            >
               <mat-icon fontIcon="close"></mat-icon>
             </button>
           </mat-form-field>
@@ -196,12 +288,82 @@
       <h4 class="detail-section-title">System Metadata</h4>
       <div class="detail-meta-row">
         <span class="detail-meta-label">Created (Local)</span>
-        <span class="detail-meta-value">{{ taskDetail.taskCreatedAtUtc ? (taskDetail.taskCreatedAtUtc | date: metadataDateFormat) : 'N/A' }}</span>
+        <span class="detail-meta-value">{{
+          taskDetail.taskCreatedAtUtc
+            ? (taskDetail.taskCreatedAtUtc | date: metadataDateFormat)
+            : "N/A"
+        }}</span>
       </div>
       <div class="detail-meta-row">
         <span class="detail-meta-label">Updated (Local)</span>
-        <span class="detail-meta-value">{{ taskDetail.taskUpdatedAtUtc ? (taskDetail.taskUpdatedAtUtc | date: metadataDateFormat) : 'N/A' }}</span>
+        <span class="detail-meta-value">{{
+          taskDetail.taskUpdatedAtUtc
+            ? (taskDetail.taskUpdatedAtUtc | date: metadataDateFormat)
+            : "N/A"
+        }}</span>
       </div>
+    </section>
+
+    <section class="detail-section attachment-section">
+      <div class="attachment-header">
+        <h4 class="detail-section-title">Attachments</h4>
+        <input
+          #attachmentInput
+          class="attachment-input"
+          type="file"
+          (change)="onAttachmentSelected($event)"
+        />
+        <button
+          mat-stroked-button
+          type="button"
+          class="attachment-upload-btn"
+          [disabled]="isUploadingAttachment"
+          (click)="attachmentInput.click()"
+        >
+          <mat-icon fontIcon="attach_file"></mat-icon>
+          {{ isUploadingAttachment ? "Uploading" : "Add file" }}
+        </button>
+      </div>
+
+      <div
+        class="attachment-list"
+        *ngIf="attachments.length; else emptyAttachments"
+      >
+        <div class="attachment-row" *ngFor="let attachment of attachments">
+          <div class="attachment-summary">
+            <mat-icon fontIcon="description"></mat-icon>
+            <div class="attachment-copy">
+              <span class="attachment-name">{{ attachment.fileName }}</span>
+              <span class="attachment-meta">
+                {{ attachment.contentType || "application/octet-stream" }} ·
+                {{ formatAttachmentSize(attachment.sizeBytes) }}
+              </span>
+            </div>
+          </div>
+          <div class="attachment-actions">
+            <button
+              mat-icon-button
+              type="button"
+              (click)="openAttachment(attachment)"
+              aria-label="Open attachment"
+            >
+              <mat-icon fontIcon="open_in_new"></mat-icon>
+            </button>
+            <button
+              mat-icon-button
+              type="button"
+              (click)="deleteAttachment(attachment)"
+              aria-label="Delete attachment"
+            >
+              <mat-icon fontIcon="delete"></mat-icon>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <ng-template #emptyAttachments>
+        <p class="attachment-empty">No files attached.</p>
+      </ng-template>
     </section>
 
     <div class="detail-actions">
@@ -209,6 +371,90 @@
         <mat-icon fontIcon="save"></mat-icon>
         Save changes
       </button>
+    </div>
+  </section>
+
+  <section
+    class="attachment-preview-backdrop"
+    *ngIf="previewAttachment"
+    (click)="closeAttachmentPreview()"
+  >
+    <div class="attachment-preview-panel" (click)="$event.stopPropagation()">
+      <header class="attachment-preview-header">
+        <div class="attachment-preview-title">
+          <mat-icon fontIcon="description"></mat-icon>
+          <div>
+            <h4>{{ previewAttachment.fileName }}</h4>
+            <p>
+              {{ previewAttachment.contentType || "application/octet-stream" }}
+              -
+              {{ formatAttachmentSize(previewAttachment.sizeBytes) }}
+            </p>
+          </div>
+        </div>
+        <div class="attachment-preview-actions">
+          <button
+            mat-icon-button
+            type="button"
+            (click)="downloadPreviewAttachment()"
+            [disabled]="isPreviewLoading || !previewObjectUrl"
+            aria-label="Download attachment"
+          >
+            <mat-icon fontIcon="download"></mat-icon>
+          </button>
+          <button
+            mat-icon-button
+            type="button"
+            (click)="closeAttachmentPreview()"
+            aria-label="Close attachment preview"
+          >
+            <mat-icon fontIcon="close"></mat-icon>
+          </button>
+        </div>
+      </header>
+
+      <div class="attachment-preview-body">
+        <div class="attachment-preview-loading" *ngIf="isPreviewLoading">
+          Loading preview...
+        </div>
+
+        <img
+          *ngIf="!isPreviewLoading && previewKind === 'image' && previewObjectUrl"
+          class="attachment-preview-image"
+          [src]="previewObjectUrl"
+          [alt]="previewAttachment.fileName"
+        />
+
+        <iframe
+          *ngIf="!isPreviewLoading && previewKind === 'pdf' && previewSafeUrl"
+          class="attachment-preview-frame"
+          [src]="previewSafeUrl"
+          [title]="previewAttachment.fileName"
+        ></iframe>
+
+        <pre
+          *ngIf="!isPreviewLoading && previewKind === 'text'"
+          class="attachment-preview-text"
+          >{{ previewText }}</pre
+        >
+
+        <div
+          class="attachment-preview-unsupported"
+          *ngIf="!isPreviewLoading && previewKind === 'unsupported'"
+        >
+          <mat-icon fontIcon="insert_drive_file"></mat-icon>
+          <p>Preview is not available for this file type.</p>
+          <button
+            mat-stroked-button
+            type="button"
+            (click)="downloadPreviewAttachment()"
+            [disabled]="!previewObjectUrl"
+          >
+            <mat-icon fontIcon="download"></mat-icon>
+            Download
+          </button>
+        </div>
+      </div>
     </div>
   </section>
 </ng-container>

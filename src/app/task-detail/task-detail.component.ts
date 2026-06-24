@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { TaskService } from '../../task/task.service';
 import { Task } from '../../model/task.types';
 import { MatInputModule } from '@angular/material/input';
@@ -12,7 +12,11 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatOptionModule } from '@angular/material/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { combineLatest } from 'rxjs';
+import { ToastrService } from 'ngx-toastr';
+import { StorageService } from '../storage.service';
+import { TaskAttachment } from '../../model/storage.types';
 
 type NullableTaskDateKey =
   | 'taskStartAtUtc'
@@ -21,6 +25,7 @@ type NullableTaskDateKey =
   | 'taskDueAtUtc'
   | 'taskDeletedAtUtc';
 type EditableTaskDateKey = NullableTaskDateKey;
+type AttachmentPreviewKind = 'image' | 'pdf' | 'text' | 'unsupported';
 
 @Component({
   selector: 'app-task-detail',
@@ -39,10 +44,18 @@ type EditableTaskDateKey = NullableTaskDateKey;
   templateUrl: './task-detail.component.html',
   styleUrl: './task-detail.component.scss',
 })
-export class TaskDetailComponent implements OnInit {
+export class TaskDetailComponent implements OnInit, OnDestroy {
   taskDetail: Task | undefined;
   private _currentTaskId: number | null = null;
   dependencyTaskIdsInput: string = '';
+  attachments: TaskAttachment[] = [];
+  isUploadingAttachment = false;
+  isPreviewLoading = false;
+  previewAttachment: TaskAttachment | null = null;
+  previewObjectUrl: string | null = null;
+  previewSafeUrl: SafeResourceUrl | null = null;
+  previewText: string | null = null;
+  previewKind: AttachmentPreviewKind = 'unsupported';
   readonly localTimeZone: string =
     Intl.DateTimeFormat().resolvedOptions().timeZone || 'Local time';
   readonly metadataDateFormat: string = 'MMM d, y, h:mm:ss a z';
@@ -66,6 +79,9 @@ export class TaskDetailComponent implements OnInit {
     private _activatedRoute: ActivatedRoute,
     private _router: Router,
     private _changeDetectorRef: ChangeDetectorRef,
+    private _storageService: StorageService,
+    private _toastrService: ToastrService,
+    private _domSanitizer: DomSanitizer,
   ) {}
 
   ngOnInit(): void {
@@ -75,41 +91,43 @@ export class TaskDetailComponent implements OnInit {
         const parsedTaskId = Number.parseInt(taskId, 10);
         if (!Number.isNaN(parsedTaskId) && parsedTaskId > 0) {
           this._currentTaskId = parsedTaskId;
+          this.attachments = [];
           this._taskService.loadTaskDetailByTaskId(parsedTaskId);
+          this.loadAttachments(parsedTaskId);
           return;
         }
       }
 
       this._currentTaskId = null;
+      this.attachments = [];
       this._taskService.updateTaskDetail(undefined);
       this.backToList();
     });
 
-    combineLatest([this._taskService.taskDetail$, this._taskService.dailyTask$]).subscribe(
-      ([taskDetail, dailyTasks]) => {
-        if (
-          this._currentTaskId &&
-          dailyTasks !== undefined &&
-          !taskDetail
-        ) {
-          this.backToList();
-          return;
-        }
+    combineLatest([
+      this._taskService.taskDetail$,
+      this._taskService.dailyTask$,
+    ]).subscribe(([taskDetail, dailyTasks]) => {
+      if (this._currentTaskId && dailyTasks !== undefined && !taskDetail) {
+        this.backToList();
+        return;
+      }
 
-        this.taskDetail = structuredClone(taskDetail);
-        this.dependencyTaskIdsInput = (
-          this.taskDetail?.taskDependencyTaskIds ?? []
-        ).join(', ');
-        this.dateInputValues = {
-          taskStartAtUtc: this.toDateObject(this.taskDetail?.taskStartAtUtc),
-          taskEndAtUtc: this.toDateObject(this.taskDetail?.taskEndAtUtc),
-          taskDueAtUtc: this.toDateObject(this.taskDetail?.taskDueAtUtc),
-          taskCompletedAtUtc: this.toDateObject(this.taskDetail?.taskCompletedAtUtc),
-          taskDeletedAtUtc: this.toDateObject(this.taskDetail?.taskDeletedAtUtc),
-        };
-        this._changeDetectorRef.markForCheck();
-      },
-    );
+      this.taskDetail = structuredClone(taskDetail);
+      this.dependencyTaskIdsInput = (
+        this.taskDetail?.taskDependencyTaskIds ?? []
+      ).join(', ');
+      this.dateInputValues = {
+        taskStartAtUtc: this.toDateObject(this.taskDetail?.taskStartAtUtc),
+        taskEndAtUtc: this.toDateObject(this.taskDetail?.taskEndAtUtc),
+        taskDueAtUtc: this.toDateObject(this.taskDetail?.taskDueAtUtc),
+        taskCompletedAtUtc: this.toDateObject(
+          this.taskDetail?.taskCompletedAtUtc,
+        ),
+        taskDeletedAtUtc: this.toDateObject(this.taskDetail?.taskDeletedAtUtc),
+      };
+      this._changeDetectorRef.markForCheck();
+    });
   }
 
   onOptionalNumberChanged(
@@ -173,6 +191,124 @@ export class TaskDetailComponent implements OnInit {
 
   onSaveDetail() {
     this._taskService.updateTask(this.taskDetail, 'detail');
+  }
+
+  onAttachmentSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    input.value = '';
+
+    if (!file || !this.taskDetail?.taskId || this.isUploadingAttachment) {
+      return;
+    }
+
+    this.isUploadingAttachment = true;
+    this._storageService.uploadTaskAttachment(this.taskDetail.taskId, file).subscribe({
+      next: (attachment) => {
+        this.attachments = [attachment, ...this.attachments];
+        this.isUploadingAttachment = false;
+        this._toastrService.success('Attachment uploaded');
+        this._changeDetectorRef.markForCheck();
+      },
+      error: (error) => {
+        console.log(error);
+        this.isUploadingAttachment = false;
+        this._toastrService.error('Could not upload attachment');
+        this._changeDetectorRef.markForCheck();
+      },
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.revokePreviewObjectUrl();
+  }
+
+  openAttachment(attachment: TaskAttachment) {
+    this.closeAttachmentPreview();
+    this.previewAttachment = attachment;
+    this.previewKind = this.getAttachmentPreviewKind(attachment);
+    this.isPreviewLoading = true;
+
+    this._storageService.download(attachment.objectKey).subscribe({
+      next: (blob) => {
+        const objectUrl = URL.createObjectURL(blob);
+        this.previewObjectUrl = objectUrl;
+        this.previewSafeUrl =
+          this._domSanitizer.bypassSecurityTrustResourceUrl(objectUrl);
+
+        if (this.previewKind === 'text') {
+          blob.text().then((content) => {
+            this.previewText = content;
+            this.isPreviewLoading = false;
+            this._changeDetectorRef.markForCheck();
+          });
+          return;
+        }
+
+        this.isPreviewLoading = false;
+        this._changeDetectorRef.markForCheck();
+      },
+      error: (error) => {
+        console.log(error);
+        this.closeAttachmentPreview();
+        this._toastrService.error('Could not open attachment');
+      },
+    });
+  }
+
+  closeAttachmentPreview() {
+    this.revokePreviewObjectUrl();
+    this.previewAttachment = null;
+    this.previewSafeUrl = null;
+    this.previewText = null;
+    this.previewKind = 'unsupported';
+    this.isPreviewLoading = false;
+    this._changeDetectorRef.markForCheck();
+  }
+
+  downloadPreviewAttachment() {
+    if (!this.previewAttachment || !this.previewObjectUrl) {
+      return;
+    }
+
+    const link = document.createElement('a');
+    link.href = this.previewObjectUrl;
+    link.download = this.previewAttachment.fileName;
+    link.click();
+  }
+
+  deleteAttachment(attachment: TaskAttachment) {
+    if (!this.taskDetail?.taskId) {
+      return;
+    }
+
+    this._storageService
+      .deleteTaskAttachment(this.taskDetail.taskId, attachment.taskAttachmentId)
+      .subscribe({
+      next: () => {
+        this.attachments = this.attachments.filter(
+          (item) => item.taskAttachmentId !== attachment.taskAttachmentId,
+        );
+        this._toastrService.success('Attachment deleted');
+        this._changeDetectorRef.markForCheck();
+      },
+      error: (error) => {
+        console.log(error);
+        this._toastrService.error('Could not delete attachment');
+      },
+    });
+  }
+
+  formatAttachmentSize(sizeBytes: number): string {
+    if (sizeBytes < 1024) {
+      return `${sizeBytes} B`;
+    }
+
+    if (sizeBytes < 1024 * 1024) {
+      return `${(sizeBytes / 1024).toFixed(1)} KB`;
+    }
+
+    return `${(sizeBytes / (1024 * 1024)).toFixed(1)} MB`;
   }
 
   backToList() {
@@ -257,5 +393,51 @@ export class TaskDetailComponent implements OnInit {
     }
 
     return [...new Set(dependencyIds)];
+  }
+
+  private loadAttachments(taskId: number) {
+    this._storageService.listTaskAttachments(taskId).subscribe({
+      next: (attachments) => {
+        if (this._currentTaskId !== taskId) {
+          return;
+        }
+
+        this.attachments = attachments;
+        this._changeDetectorRef.markForCheck();
+      },
+      error: (error) => {
+        console.log(error);
+        this.attachments = [];
+        this._toastrService.error('Could not load attachments');
+        this._changeDetectorRef.markForCheck();
+      },
+    });
+  }
+
+  private getAttachmentPreviewKind(
+    attachment: TaskAttachment,
+  ): AttachmentPreviewKind {
+    const contentType = attachment.contentType.toLowerCase();
+
+    if (contentType.startsWith('image/')) {
+      return 'image';
+    }
+
+    if (contentType === 'application/pdf') {
+      return 'pdf';
+    }
+
+    if (contentType.startsWith('text/')) {
+      return 'text';
+    }
+
+    return 'unsupported';
+  }
+
+  private revokePreviewObjectUrl() {
+    if (this.previewObjectUrl) {
+      URL.revokeObjectURL(this.previewObjectUrl);
+      this.previewObjectUrl = null;
+    }
   }
 }

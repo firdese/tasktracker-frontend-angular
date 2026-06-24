@@ -36,6 +36,10 @@ export class ProjectDashboardComponent implements OnInit, OnDestroy {
     private _router: Router,
   ) {}
 
+  get showWelcomeMessage(): boolean {
+    return this._router.url.split('?')[0] === '/';
+  }
+
   ngOnInit(): void {
     if (hasAccessToken()) {
       this._projectDashboardService.loadTaskGroups();

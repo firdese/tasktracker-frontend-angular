@@ -191,9 +191,21 @@
   border-color: rgba(148, 163, 184, 0.35) !important;
 }
 
-:host ::ng-deep .detail-field .mdc-text-field--focused .mdc-notched-outline__leading,
-:host ::ng-deep .detail-field .mdc-text-field--focused .mdc-notched-outline__notch,
-:host ::ng-deep .detail-field .mdc-text-field--focused .mdc-notched-outline__trailing {
+:host
+  ::ng-deep
+  .detail-field
+  .mdc-text-field--focused
+  .mdc-notched-outline__leading,
+:host
+  ::ng-deep
+  .detail-field
+  .mdc-text-field--focused
+  .mdc-notched-outline__notch,
+:host
+  ::ng-deep
+  .detail-field
+  .mdc-text-field--focused
+  .mdc-notched-outline__trailing {
   border-color: rgba(56, 189, 248, 0.65) !important;
 }
 
@@ -260,6 +272,244 @@
   color: #cbd5e1;
 }
 
+.attachment-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.attachment-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.attachment-header .detail-section-title {
+  margin-bottom: 0;
+}
+
+.attachment-input {
+  display: none;
+}
+
+.attachment-upload-btn {
+  flex: 0 0 auto;
+  min-height: 2rem !important;
+  border-color: rgba(56, 189, 248, 0.42) !important;
+  color: #e0f2fe !important;
+}
+
+.attachment-upload-btn mat-icon {
+  margin-right: 0.25rem;
+}
+
+.attachment-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.attachment-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  min-height: 3rem;
+  padding: 0.55rem 0.65rem;
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  border-radius: 0.65rem;
+  background: rgba(15, 23, 42, 0.55);
+}
+
+.attachment-summary {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  min-width: 0;
+}
+
+.attachment-summary mat-icon {
+  flex: 0 0 auto;
+  color: #7dd3fc;
+}
+
+.attachment-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 0.12rem;
+  min-width: 0;
+}
+
+.attachment-name {
+  overflow: hidden;
+  color: #e2e8f0;
+  font-size: 0.82rem;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.attachment-meta {
+  overflow: hidden;
+  color: #94a3b8;
+  font-size: 0.68rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.attachment-actions {
+  display: flex;
+  align-items: center;
+  flex: 0 0 auto;
+}
+
+.attachment-actions button {
+  color: #cbd5e1;
+}
+
+.attachment-empty {
+  margin: 0;
+  color: #94a3b8;
+  font-size: 0.78rem;
+}
+
+.attachment-preview-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.25rem;
+  background: rgba(2, 6, 23, 0.72);
+  backdrop-filter: blur(8px);
+}
+
+.attachment-preview-panel {
+  display: flex;
+  flex-direction: column;
+  width: min(72rem, 96vw);
+  height: min(46rem, 90vh);
+  overflow: hidden;
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  border-radius: 0.85rem;
+  background: #0f172a;
+  box-shadow: 0 1.25rem 4rem rgba(0, 0, 0, 0.42);
+}
+
+.attachment-preview-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.18);
+}
+
+.attachment-preview-title {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  min-width: 0;
+}
+
+.attachment-preview-title mat-icon {
+  flex: 0 0 auto;
+  color: #7dd3fc;
+}
+
+.attachment-preview-title h4,
+.attachment-preview-title p {
+  overflow: hidden;
+  margin: 0;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.attachment-preview-title h4 {
+  color: #f8fafc;
+  font-size: 0.95rem;
+}
+
+.attachment-preview-title p {
+  margin-top: 0.12rem;
+  color: #94a3b8;
+  font-size: 0.72rem;
+}
+
+.attachment-preview-actions {
+  display: flex;
+  align-items: center;
+  flex: 0 0 auto;
+}
+
+.attachment-preview-actions button {
+  color: #cbd5e1;
+}
+
+.attachment-preview-body {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding: 1rem;
+  background: rgba(2, 6, 23, 0.46);
+}
+
+.attachment-preview-loading {
+  color: #cbd5e1;
+  font-size: 0.86rem;
+}
+
+.attachment-preview-image {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.attachment-preview-frame {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  border-radius: 0.45rem;
+  background: #ffffff;
+}
+
+.attachment-preview-text {
+  align-self: stretch;
+  width: 100%;
+  margin: 0;
+  overflow: auto;
+  color: #dbeafe;
+  font-family: "Consolas", "Courier New", monospace;
+  font-size: 0.78rem;
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
+
+.attachment-preview-unsupported {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  gap: 0.75rem;
+  color: #cbd5e1;
+  text-align: center;
+}
+
+.attachment-preview-unsupported mat-icon {
+  width: 3rem;
+  height: 3rem;
+  color: #7dd3fc;
+  font-size: 3rem;
+}
+
+.attachment-preview-unsupported p {
+  margin: 0;
+}
+
 .detail-actions button {
   border-radius: 0.65rem;
 }
@@ -284,5 +534,29 @@
 
   .detail-section {
     padding: 0.75rem;
+  }
+
+  .attachment-header,
+  .attachment-row {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .attachment-upload-btn,
+  .attachment-actions {
+    align-self: flex-end;
+  }
+
+  .attachment-preview-backdrop {
+    padding: 0.65rem;
+  }
+
+  .attachment-preview-panel {
+    width: 100%;
+    height: 92vh;
+  }
+
+  .attachment-preview-header {
+    align-items: flex-start;
   }
 }
